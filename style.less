@@ -1,0 +1,453 @@
+
+@xp_color: #B000B0;
+@bp_color: #5656EB;
+@gold_color: gold;
+
+
+body {
+ background-color: #272822;
+}
+
+
+.game {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top:0;
+    left: 0;
+
+    .collection_holder {
+        width: 70%;
+        height: 100%;
+        position: relative;
+        display: inline-block;
+        .collection {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+    }
+    .sidebar_holder {
+        display: inline-block;
+        position: fixed;
+        top: 0;
+        left: 70%;
+        width: 30%;
+        height: 100%;
+        border: 1px dotted red;
+
+        .sidebar {
+            top: 5px;
+            left: 5px;
+            position: absolute;
+            //width: 100%;
+            //height: 100%;
+            //overflow-y: auto;
+            overflow: hidden;
+        }
+    }
+}
+
+.banner {
+    height: 250px;
+    width: 100%;
+    display: none;
+    position: absolute;
+    background-color: rgba(0,0,0,0.85);
+}
+
+.sidebar {
+    position: relative;
+    color: white;
+    font-size: 12pt;
+    .gold_label {
+        font-weight: bold;
+    }
+    #status_block .status_line .label {
+        padding-right: 10px;
+    }
+    .status_line {
+        position: relative;
+        #xpbar .ui-progressbar-value {
+            background: #B000B0;
+        }
+        #bpbar .ui-progressbar-value {
+
+            background: ##5656EB;
+        }
+        #xpbar, #bpbar {
+            font-size: 10pt !important;
+            float: right;
+            //display: inline-block;
+            margin-right: 20px;
+            width: 50%;
+            height: 11pt;
+            //margin-top: 3px;
+            position: absolute;
+            .bar_label {
+                position: absolute;
+                left: 10%;
+                top: 1px;
+                font-weight: bold;
+                text-shadow: 1px 1px 0 #000;
+            }
+        }
+    }
+    #tabs_holder {
+        height: 25px;
+        font-size: 12pt;
+        .tab {
+            display: inline-block;
+            height: 100%;
+            border: 1px solid white;
+            text-align: center;
+            &:hover {
+                background-color: rgba(0, 255, 255, 0.1);
+            }
+            &.active {
+                background-color: rgba(0, 255, 255, 0.3);
+            }
+            .tab_icon {
+                display: inline-block;
+                margin-top: 3px;
+            }
+        }
+    }
+    #panes_holder {
+        font-size: 12pt;
+        position: relative;
+        overflow: hidden;
+        #inner_panes_holder {
+            position: absolute;
+            .pane {
+                position: absolute;
+                overflow-y: auto;
+            }
+        }
+    }
+
+
+}
+
+.die_container, .die_shop {
+    //background-color: black;
+    width: 80px;
+    height: 90px;
+    border: 2px solid white;
+    position: relative;
+    display: inline-block;
+    float: left;
+    &.active {
+        background-color: rgba(0,255,255, 0.3);
+    }
+
+    .bottom_line {
+        font-size: 8pt;
+        top: 75px;
+        left: 3px;
+        width: 67px;
+        height: 10px;
+        display: inline-block;
+        position: absolute;
+        color: white;
+        &.multiplier {
+            text-align: left;
+        }
+        &.magic {
+            text-align: right;
+            .icon-star {
+                color: yellow;
+            }
+        }
+    }
+
+    #cost_label {
+        color: gold;
+        font-size: 14pt;
+        text-align: center;
+        margin-top: 12px;
+    }
+    .button_holder {
+        font-size: 12pt;
+        text-align: center;
+        margin-top: 12px;
+        button {
+            background-color: green;
+            color: black;
+        }
+    }
+}
+
+.die_poly {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    .overlay {
+        position: absolute;
+        width: 70;
+        height: 70;
+        line-height: 70px;
+        font-weight: bold;
+        font-size: 20pt;
+        top: 0px;
+        left: 0px;
+        text-align: center;
+    }
+}
+
+
+.trick_pane .trick {
+    border: 2px solid silver;
+    -webkit-border-radius: 6px;
+    padding:  2px;
+    background-color:  rgba(0, 128, 128, 0.3);
+}
+
+.trick_log {
+    margin-top: 4px;
+    //border: 1px solid white;
+    #name_holder p {
+        margin-top: 0px;
+        margin-bottom: 3px;
+        #name {
+            font-weight: bold;
+        }
+        #numbers {
+            font-size: 8pt;
+        }
+    }
+    .reward {
+        margin-bottom: 3px;
+    }
+}
+
+.trick_block {
+    font-size: 8pt;
+    margin-top: 4px;
+    border: 1px solid white;
+    -webkit-border-radius: 3px;
+    padding: 4px;
+    &.streak {
+        background-color: rgba(0, 255, 0, 0.10);
+    }
+    &.combo {
+        background-color: rgba(0, 0, 255, 0.10);
+    }
+
+    .tbline {
+        #trick_name {
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        #description {
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+        &#reward_description_holder {
+
+        }
+        #trick_cost {
+            float: right;
+
+        }
+    }
+}
+
+#bp, .bp {
+    color: @bp_color;
+}
+#xp, .xp {
+    color: @xp_color;
+}
+
+#gold, .gold {
+    color: @gold_color;
+}
+
+
+.flyer {
+    &.perk_flyer {
+        width: 400px;
+        //height: 200px;
+        position: absolute;
+        .line {
+            width: 100%;
+            //height: 30px;
+            font-size: 16pt;
+            text-align: center;
+            &.level {
+                color: green;
+                font-size: 36pt;
+            }
+            &.description {
+                color: white;
+            }
+            &.name {
+                color: blue;
+                //text-decoration: underline;
+
+            }
+        }
+    }
+}
+
+
+.perk_block {
+    font-size: 8pt;
+    margin-top: 4px;
+    border: 1px solid white;
+    -webkit-border-radius: 3px;
+    padding: 4px;
+    background-color: rgba(0, 115, 0, 0.3);
+    &.next {
+        background-color: transparent;
+    }
+
+    .pbline {
+        #perk_name {
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        #description {
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+    }
+}
+
+@die_white: rgba(255, 255, 255, 1);
+@die_red: rgba(255, 0, 0, 1);
+@die_blue: rgba(0, 0, 255, 1);
+@die_green: rgba(0, 255, 0, 1);
+@die_yellow: rgba(255, 255, 0, 1);
+@die_purple: rgba(255, 0, 255, 1);
+@die_pink: rgba(255, 128, 128, 1);
+
+.color_tab(@color) {
+    border: 1px solid white;
+
+    background-color: fade(@color, 10%);
+    &.active, &:hover {
+        background-color: fade(@color, 50%);
+    }
+
+}
+
+.shortcut {
+    font-style: italic;
+    color: yellow;
+}
+
+#upgrade_pane {
+    color: white;
+    .magic_insert {
+        font-size: 13pt;
+        color: @die_purple;
+        font-weight: bold;
+    }
+    table {
+        color: white;
+        td {
+            &.label {
+                font-weight: bold;
+            }
+
+        }
+    }
+    .color_tabs {
+        margin-top: 10px;
+        .color_tab {
+            display: inline-block;
+            text-align: center;
+            height: 22px;
+            width: 13%;
+            overflow: hidden;
+            font-style: italic;
+
+            &.white {
+                .color_tab(@die_white);
+            }
+            &.red {
+                .color_tab(@die_red);
+            }
+            &.blue {
+                .color_tab(@die_blue);
+            }
+            &.green {
+                .color_tab(@die_green);
+            }
+
+            &.yellow {
+                .color_tab(@die_yellow);
+            }
+            &.purple {
+                .color_tab(@die_purple);
+            }
+            &.pink {
+                .color_tab(@die_pink);
+            }
+        }
+    }
+    .shortcut_help {
+        margin-top: 20px;
+    }
+}
+.red {
+    color: @die_red;
+}
+.green {
+    color: @die_green;
+}
+.yellow {
+    color: @die_yellow;
+}
+.blue {
+    color: @die_blue;
+}
+.purple {
+    color: @die_purple;
+}
+.pink {
+    color: @die_pink;
+}
+
+
+#tutorial {
+    font-size: 10pt;
+    .step {
+        display: none;
+    }
+    .xp, .bp, .gold, .trick, .white, .red, .green, .yellow, .blue, .purple, .pink {
+        font-weight: bold;
+    }
+
+    .trick {
+        color: green;
+    }
+
+}
+
+.ui-widget {
+    font-size: 12pt !important;
+}
+.ui-dialog-titlebar {
+    padding: 0.1em 0.1em !important;
+}
+
+
+#sounds, #music {
+    color: white;
+    &.muted {
+        color: red;
+    }
+}
+

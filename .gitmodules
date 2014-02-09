@@ -1,0 +1,6 @@
+[submodule "libs/classy"]
+	path = libs/classy
+	url = git@github.com:jamuspsi/classy
+[submodule "libs/underscore"]
+	path = libs/underscore
+	url = git@github.com:documentcloud/underscore

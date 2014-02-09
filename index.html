@@ -1,0 +1,168 @@
+<html>
+<head>
+    <link rel="stylesheet/less" type="text/css" href="style.less" />
+
+    <!-- external -->
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <script type="text/javascript" src="http://code.createjs.com/soundjs-0.4.1.min.js"></script>
+
+	<script type="text/javascript" src="/libs/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="/libs/classy/classy.js"></script>
+	<link href="/libs/jquery-ui-1.10.3.custom/css/custom-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+	<script src="/libs/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.js"></script>
+	<script type="text/javascript" src="/libs/jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="/libs/mousetrap.min.js"></script>
+
+	<script src="/libs/underscore/underscore.js"></script>
+
+	<script type="text/javascript">less = { env: 'development' };</script>
+	<script type="text/javascript" src="/libs/less-1.3.3.min.js"></script>
+	<script type="text/javascript" src="/libs/raphael-min.js"></script>
+
+    <!-- ice -->
+	<script src="/libs/ice/ice.js"></script>
+	<script src="/libs/ice/templates.js"></script>
+	<script src="/libs/ice/point.js"></script>
+	<script src="/libs/ice/renderer.js"></script>
+	<script src="/libs/ice//trig.js"></script>
+	<script src="/libs/ice/rand.js"></script>
+	<script src="/libs/ice/tooltips.js"></script>
+	<script src="/libs/ice/controller.js"></script>
+
+
+    <script src="main.js"></script>
+    <script src="keybindings.js"></script>
+    <script src="settings.js"></script>
+
+</head>
+<body>
+
+
+    <div style="display: none" id="html_templates" class="html_templates">
+        <div id="sidebar" class="sidebar">
+            <div id="status_block">
+                <div class="status_line">
+                    <span class="label">Level:</span>
+                    <span id="level" class="label level"></span>
+                    <span style="float: right">
+                        <i id="sounds" class="icon-volume-up"></i>
+                        <i id="music" class="icon-music"></i>
+                        <i id="help" class="icon-question-sign"></i>
+                    </span>
+                </div>
+				<div class="status_line">
+                    <span class="label">Rolls Left:</span>
+                    <span id="rolls_remaining" class="label rolls_remaining"></span>
+                    /
+                    <span id="total_rolls" class="label total_rolls"></span>
+                </div>
+
+                <div class="status_line">
+                    <span class="label">Gold:</span>
+                    <span id="gold" class="label gold"></span>
+                </div>
+                <div class="status_line">
+                    <span class="label">XP:</span>
+                    <span id="xp" class="label xp"></span>
+                    <div id="xpbar" class="xpbar">
+                    	<div id="xpbar_label" class="bar_label"></div>
+                    </div>
+                </div>
+                <div class="status_line">
+                    <span class="label">BP:</span>
+                    <span id="bp" class="label bp"></span>
+                    <div id="bpbar" class="bpbar">
+                    	<div id="bpbar_label" class="bar_label"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="tabs_holder" class="ui-widget-content">
+            </div>
+            <div id="panes_holder">
+            	<div id="inner_panes_holder">
+            	</div>
+            </div>
+
+        </div>
+
+        <div id="tutorial">
+            <div id="step_holder"></div>
+            <div id="step0" class="step">
+                <p> Hi, and thanks for playing my first game.</p>
+                <p>You can move this window around at any time.</p>
+                <p>If you skip the tutorial, you can click Help at any time.</p>
+            </div>
+            <div id="step1" class="step">
+                <p>Dunno is a game about rolling dice and making money.  Try to make as much money as you can in a limited number of turns.</p>
+            </div>
+            <div id="step2" class="step">
+                <p>Your dice are on the left, and you can click them to upgrade, once you have some cash.</p>
+                <p>On the right are the tabs where you'll control the game.</p>
+                <p>
+                  Click <i icon="icon-play"></i>to see the <strong>Turn</strong> pane.  There, click <strong>Roll</strong> to roll the dice you have.
+                </p>
+            </div>
+            <div id="step3" class="step">
+                <p>Rolling your dice gives you stuff!</p>
+                <p><span class="gold">Gold</span> is for buying dice, upgrading dice, and buying tricks.  <strong>Most dice award you money when you roll them.</strong>
+                </p>
+                <p><span class="xp">Experience points</span> are for levels.  Levels give you bonuses.  <stong>You keep your XP when you start a new game.</strong>
+                </p>
+                <p><span class="bp">Bonus points</span> are for extra turns. <strong>Each extra turn costs more.</strong>  You get these with Blue dice (explained later).</p>
+            </div>
+            <div id="step4" class="step">
+                <p><span class="trick">Tricks</span> are special "moves" you can do, like getting One Pair of the same number in one roll, or Three of a Kind.</p>
+                <p>Click <i class="icon-bolt"></i> to see the tricks you have.  You start with <span class="trick">One Pair</span>.</p>
+                <p>
+                    Tricks usually grant you a bonus on top of what the matching dice give.  Click next to learn more.
+                </p>
+                <p>Click <i class="icon-shopping-cart"></i> to purchase tricks.  Tricks only last for the current game, but they're <strong> very important!</strong>
+                </p>
+            </div>
+            <div id="step5" class="step">
+                <p>
+                    Example die rolls:
+                </p>
+                <p>2, 3: You gain <span class="gold">$5</span></p>
+                <p>2, 2: You gain <span class="gold">$4</span>, plus an extra 1x those earnings (<span class="gold">$4</span>) for the <span class="trick">One Pair</span> trick.</p>
+                <p>2, 2, 3, 3: You gain <span class="gold">$10</span>, plus <span class="gold">$4</span> for the pair of 2s, plus <span class="gold">$6</span> for the pair of 3s, PLUS <span class="gold">$10</span> for <span class="trick">Two Pair</span>, if you've bought that trick.</p>
+            </div>
+            <div id="step6" class="step">
+                <p>Click a die on the left to <strong>upgrade it</strong> for <class="gold">gold.</span></p>
+                <p>Sides: Increases the size of your die, giving you a chance for higher rolls.  <em>But it makes pairs harder to get.</em></p>
+                <p>Plus: Adds a number to your die roll.  For instance, a three sides dice with plus 1 (3d+1) can roll between 2 and 4, <em>but never 1.</em></p>
+                <p>Multiplier: Multiplies the earnings of the die.  <em>Stacks with <span class="trick">tricks</span>!</em></p>
+                <p>Magic: Lets you choose a color for your die, and increases the power of that color.  <em>Each color does something different!</em></p>
+            </div>
+            <div id="step7" class="step">
+                <p>Coloring your die makes it do something extra. More <strong>Magic</strong> points makes it even better!</p>
+                <p><span class="white">White</span>: Normal.  Makes money and a little bit of XP.
+                <p><span class="red">Red</span>: Earns no money, but slowly upgrades all your other dice.</p>
+                <p><span class="green">Green</span>: Always rolls the highest number it can.  No bonus from magic points.</p>
+                <p><span class="yellow">Yellow</span>: Earns much more <span class="gold">money</span>.</p>
+                <p><span class="blue">Blue</span>: Earns <span class="bp">bonus points</span> instead of money.</p>
+                <p><span class="purple">Purple</span>: Earns <span class="xp">experience points</span> instead of money.</p>
+                <p><span class="pink">Pink</span>: Increases multiplier with each roll.</p>
+            </div>
+            <div id="step8" class="step">
+                <p><strong>Don't be discouraged when you lose!</strong></p>
+                <p>When you run out of turns, you can start over but <strong>keep all the bonuses you got from levelling up.</strong>  That means the next time through will be easier and faster, especially after the first time.</p>
+                <p>Click <i class="icon-levelup"></i> to see the Perks you've gained from levelling up so far.</p>
+            </div>
+            <div id="step9" class="step">
+                <p><strong>That's it!</strong></p>
+                <p>This is the first game I've ever released, and though it's a silly, simple grinder, I'm really proud of how it turned out.  Please leave a comment if you can!  Positive or negative, I'll use it to make my next game even better!</p>
+                <p>Thanks for playing!</p>
+            </div>
+
+        </div>
+
+
+	</div>
+
+
+</body>
+</html>
+
