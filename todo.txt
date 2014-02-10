@@ -1,0 +1,25 @@
+God only knows how I'm going to pull this off.
+
+Luckily I've done this a couple times before. :-/
+
+We'll need a game grid, I'm pretty sold on the hex version.
+
+Raw game objects:
+    Arena
+    ArenaSlot
+    Mob
+    Player
+    Skills (one per color)
+    Talents
+    Hoodoo
+    Spell
+    Effect
+
+I need to draw.  Can't get away from it.
+
+Hoodoo: An internal mechanic that does something.  With "chance", "pre", "post" phases.
+Effect: An internal source of mechanic responses.  When it fires triggers, casts its own hoodoos. (As though a spell was being cast, because basically it is.)
+
+Chance phase is both prevent and redirect.  If the chance phase ends in a redirect, you get another chance phase.  (No single hoodoo can fire more than once in a round.  A round begins with a top-level spellcast and ends when it is fully complete.  This should prevent recursion.)
+
+Let's do.. mob/skills, arena, arena slot, then a spell.

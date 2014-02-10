@@ -9,11 +9,14 @@ $(function(){
     settings = new Settings();
     settings.load();
 
+
+
     game = Proto.start_game();
     scene = new Scene();
     scene.game(game);
     game.scene = scene;
     game.sidebar = scene.sidebar;
+
 
     var body = $('body');
     // console.log(body, scene.$el);
@@ -34,6 +37,11 @@ Proto = Ice.$extend('Proto', {
         this.$super();
 
         this.load_game(blob);
+
+        this.stack = Stack();
+        this.arena = IceObservable(this, null);
+        this.arena(Arena());
+
 
     },
     save_game: function() {

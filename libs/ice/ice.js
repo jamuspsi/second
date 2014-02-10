@@ -51,9 +51,12 @@ window.Ice = Ice = Class.$extend({
     }
 });
 Ice.INSTANCE_COUNTERS = {};
-Ice.isIce = function(o) {
-    return obj.constructor === Class && obj.isa && obj.isa(Ice);
-}
+Ice.isIce = function(obj) {
+    return obj && obj.constructor === Class && obj.isa && obj.isa(Ice);
+};
+Ice.isa = function(o, kls) {
+    return Ice.isIce(o) && o.isa(kls);
+};
 
 function IceObservable(holder, initial_val) {
     var obs = function() {
@@ -81,7 +84,7 @@ function IceObservable(holder, initial_val) {
                     obs.fire(eargs);
                 }
                 return obs.val;
-            }
+            };
             if(arguments[1]) {
                 // Defer the event firing.
                 return event_firer;
@@ -91,51 +94,13 @@ function IceObservable(holder, initial_val) {
         }
         return obs.val;
     };
-    var IceObservable = obs.constructor = arguments.callee;
+    obs.constructor = arguments.callee;
 
     obs.subscriptions = {}; // ->eventname:[ss, ...]
-    //obs.subscribers = {}; // ->subscriberid:[ss, ...]
-    obs.fire = function(eargs) {
-        if(typeof(eargs) === 'string') {
-            eargs = {holder: obs.holder, obs: obs, eventname: eargs}
-        }
-        var subscriptions = obs.subscriptions[eargs.eventname];
-        _.each(subscriptions, function(ss) {
-            ss.callback.apply(ss.subscriber, [holder, eargs]);
-        });
-    };
-    obs.subSet = function(callback, subscriber) {
-        return obs.sub('Set', callback, subscriber);
-    };
-    obs.subChanged = function(callback, subscriber) {
-        return obs.sub('Changed', callback, subscriber);
-    }
-    obs.sub = function(eventname, callback, subscriber) {
-        if(!callback) {
-            throw 'Observable subscribe with a falsey callback';
-        }
-        var ss = {eventname: eventname, callback: callback, subscriber:subscriber};
-        var ss_by_event = obs.subscriptions[eventname];
-        if(!ss_by_event) {
-            ss_by_event = obs.subscriptions[eventname] = [];
-        }
-        ss_by_event.push(ss);
-    }
-    obs.unsub = function(unsub) {
-        _.each(obs.subscriptions, function(sublist, eventname){
-            for(var x = 0; x<sublist.length; x++) {
-                var ss = sublist[x];
-                if(!unsub || ss.subscriber === unsub || ss.callback === unsub || ss.eventname === unsub) {
-                    sublist.splice(x, 1);
-                    x--;
-                }
-            }
-        });
-    };
-
     obs.holder = holder;
     obs.val = initial_val;
     obs.events = [];
+    _.extend(obs, ObservableMethods);
 
     //prehook the holder's onChanged to this's, if the holder is an Ice.
     //console.log("prehook: holder ", holder, " holder.isa ", !!holder.isa, "typeof(holder.isa)", typeof(holder.isa), holder.isa(Ice));
@@ -146,11 +111,73 @@ function IceObservable(holder, initial_val) {
         obs.subChanged(function(holder, eargs) {
             //console.log(holder.pretty());
             //console.log('Autohook is going to fire with eargs ', eargs);
-            holder.evChanged(eargs)
+            holder.evChanged(eargs);
         }, holder);
     }
 
     return obs;
+}
+
+ObservableMethods = {
+    fire: function(eargs) {
+        var self = this;
+        if(typeof(eargs) === 'string') {
+            eargs = {
+                holder: this.holder,
+                obs: this,
+                eventname: eargs
+            };
+        }
+        var subscriptions = this.subscriptions[eargs.eventname];
+        _.each(subscriptions, function(ss) {
+            ss.callback.apply(ss.subscriber, [self.holder, eargs]);
+        });
+    },
+    subSet: function(callback, subscriber) {
+        return this.sub('Set', callback, subscriber);
+    },
+    subChanged: function(callback, subscriber) {
+        return this.sub('Changed', callback, subscriber);
+    },
+    sub: function(eventname, callback, subscriber) {
+        if(!callback) {
+            throw 'Observable subscribe with a falsey callback';
+        }
+        var ss = {eventname: eventname, callback: callback, subscriber:subscriber};
+        var ss_by_event = this.subscriptions[eventname];
+        if(!ss_by_event) {
+            ss_by_event = this.subscriptions[eventname] = [];
+        }
+        ss_by_event.push(ss);
+    },
+    unsub: function(unsub) {
+        _.each(this.subscriptions, function(sublist, eventname){
+            for(var x = 0; x<sublist.length; x++) {
+                var ss = sublist[x];
+                if(!unsub || ss.subscriber === unsub || ss.callback === unsub || ss.eventname === unsub) {
+                    sublist.splice(x, 1);
+                    x--;
+                }
+            }
+        });
+    },
+    inc: function(amt) {
+        this(this() + amt);
+    },
+    dec: function(amt) {
+        this(this() - amt);
+    },
+    higher: function(val) {
+        if(val > this()) {
+            this(val);
+        }
+    },
+    smaller: function(val) {
+        if(val < this()) {
+            this(val);
+        }
+    }
+
 };
 
 //when an observable fires, it calls callback(obs.holder, eargs)

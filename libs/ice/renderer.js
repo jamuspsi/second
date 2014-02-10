@@ -10,12 +10,14 @@ Renderer = Ice.$extend('Renderer', {
 
         //Constructing a renderer always constructs its el.
         //However, a renderer can be 'slept' to unsubscribe it temporarily.
-        this.setup_el();
         if(chain_obs) {
             this.rendered = chain_obs;
         } else {
             this.rendered = IceObservable(this, null);
         }
+
+        this.setup_el();
+
         this.rendered.subChanged(this.onRenderedChanged, this);
         this.paused.subChanged(this.listen_or_unlisten, this);
         this.on_dom.subChanged(this.listen_or_unlisten, this);
@@ -34,6 +36,22 @@ Renderer = Ice.$extend('Renderer', {
             this.$el = this.template_manager.clone(this.template_name, this);
         }
 
+        /*
+        function handleMutate(mutations) {
+            console.log("Got mutations on ", self.pretty());
+            mutations.forEach(function(mutation) {
+                console.log(mutation.addedNodes[0]);
+                if(mutation.addedNodes[0] === self.$el[0]) {
+                    console.log("Looks like I got added.");
+                }
+                console.log(mutation);
+            });
+        }
+        var config = {
+            attributes: true, childList: true, characterData: true
+        };
+        this.mobs = new MutationObserver(handleMutate);
+        this.mobs.observe(this.$el[0], config);
         this.$el.bind('DOMNodeInsertedIntoDocument', _.bind(function(e) {
 
             if(e.target === this.$el[0] ) {
@@ -47,6 +65,31 @@ Renderer = Ice.$extend('Renderer', {
                 self.onDetach();
             }
         }, this));
+        */
+    },
+    appendTo: function($parent) {
+        var self = this;
+        $parent.append(this.$el);
+        //this.post_append();
+        _.defer(_.bind(this.post_append, this), 0);
+    },
+    prependTo: function($parent) {
+        $parent.prepend(this.$el);
+        //this.post_append();
+        _.defer(_.bind(this.post_append, this), 0);
+    },
+    post_append: function() {
+        this.on_dom(this.$el.closest('html').length !== 0);
+        if(this.on_dom()) {
+            this.onAttach();
+        }
+    },
+    detach: function() {
+        this.$el.detach();
+        this.$on_dom(this.$el.closest('html').length !== 0);
+        if(!this.on_dom()) {
+            this.onDetach();
+        }
     },
     template_html: function(){},
     onRenderedChanged: function(self, eargs) {
@@ -99,7 +142,13 @@ Renderer = Ice.$extend('Renderer', {
         this.paused(false);
     },
     onAttach: function() {
-
+        //console.log("OnAttach ", this.pretty())
+        _.each(this, function(v, i, l) {
+            if(Ice.isa(v, Renderer) && !v.on_dom()) {
+                v.on_dom(true);
+                v.onAttach();
+            }
+        });
     },
     onDetach: function() {
 
@@ -112,6 +161,15 @@ Renderer = Ice.$extend('Renderer', {
         }
 
         $clicked.click(_.bind(method, this));
+
+    },
+    flash: function(color, $subelement) {
+        $subelement = $subelement || this.$el;
+        $subelement.stop(true, true);
+        $subelement.effect({
+            effect: 'highlight',
+            color: color
+        });
 
     }
 });
