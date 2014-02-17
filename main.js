@@ -20,7 +20,8 @@ $(function(){
 
     var body = $('body');
     // console.log(body, scene.$el);
-    body.prepend(scene.$el);
+    scene.appendTo(body);
+    //body.prepend(scene.$el);
 
     /*help = Help();
     if(settings.show_tutorial_on_start()) {

@@ -8,7 +8,7 @@ ArenaFrame = Renderer.$extend('ArenaFrame', {
         ].join('');
     },
     __init__: function() {
-        this.slots = Arena.CreateSlots(this, ArenaSlotFrame);
+        this.slots = Arena.CreateSlots(this, SlotFrame);
         console.log(this.slots[3][3].pretty());
         this.all_slots = _.flatten(_.map(_.values(this.slots), function(d) {
             return _.values(d);
@@ -18,8 +18,7 @@ ArenaFrame = Renderer.$extend('ArenaFrame', {
         this.arena = this.rendered;
 
 
-
-        this.rendered.subChanged(this.onArenaChange, this);
+        this.rendered.subChanged(this.onArenaMutate, this);
 
     },
     setup_el: function() {
@@ -62,7 +61,7 @@ ArenaFrame = Renderer.$extend('ArenaFrame', {
                     dist * Trig.cosd(angle),
                     dist * Trig.sind(angle) * -1 // positive is down.
                 );
-                console.log("For direction ", dir, "I got offset ", offset);
+                //console.log("For direction ", dir, "I got offset ", offset);
                 here.center = from.plus(offset);
             }
             _.each(CARDINALS, function(dir) {
@@ -84,36 +83,24 @@ ArenaFrame = Renderer.$extend('ArenaFrame', {
             slot.$el.css(slot.center.plus(center).plus(-25, -25).lt());
         });
     },
+    listen: function(arena) {
+        console.log("Arena frame is listening.");
+        this.$super(arena);
+        var self = this;
+        var arena = self.arena();
+        _.each(self.all_slots, function(slot) {
+            slot.slot(arena.slots[slot.row][slot.col]);
+        });
+    },
+    unlisten: function(arena) {
+        this.$super(arena);
+        var self = this;
+        _.each(self.all_slots, function(slot) {
+            slot.slot(null);
+        });
+    },
 
-    onArenaChange: function(eargs) {
+    onArenaMutate: function(eargs) {
 
     }
-});
-
-ArenaSlotFrame = Renderer.$extend('ArenaSlotFrame', {
-    template_html: function() {
-        return [
-            '<div class="arena_slot_frame">',
-                '<div id="portrait" class="portrait"></div>',
-            '</div>'
-        ].join('');
-    },
-    __init__: function(arena_frame, row, col) {
-        this.arena_frame = arena_frame;
-        this.row = row;
-        this.col = col;
-
-        this.$super();
-        this.slot = this.rendered;
-
-        this.rendered.subChanged(this.onSlotChange, this);
-    },
-    setup_el: function() {
-        this.$super();
-        this.$el.text(this.row + ', ' + this.col);
-    },
-    onSlotChange: function(eargs) {
-        // So now what.
-    }
-
 });

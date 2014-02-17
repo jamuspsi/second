@@ -48,7 +48,10 @@ Scene = Renderer.$extend('Scene', {
         //this.banner.refresh_layout();
     },
     render: function(game, eargs) {
-
+        game = game || this.game;
+        if(!eargs || eargs.obs === game.arena) {
+            this.arena_frame.arena(game.arena());
+        }
     }
 
 });
