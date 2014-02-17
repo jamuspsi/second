@@ -196,7 +196,7 @@ function IceEvent(holder) {
 
             ss.callback.apply(ss.subscriber, args);
         });
-    }
+    };
     ev.constructor = arguments.callee;
     ev.holder = holder;
     ev.subscriptions = [];
@@ -206,7 +206,7 @@ function IceEvent(holder) {
         }
         var ss = {callback: callback, subscriber: subscriber};
         ev.subscriptions.push(ss);
-    }
+    };
     ev.unsub = function(unsub) {
         for(var x=0;x<ev.subscriptions.length;x++) {
             var ss = ev.subscriptions[x];
@@ -215,7 +215,7 @@ function IceEvent(holder) {
                 x--;
             }
         }
-    }
+    };
     return ev;
 }
 

@@ -6,6 +6,7 @@ Renderer = Ice.$extend('Renderer', {
         this.bound = null;
 
         this.paused = IceObservable(this, false);
+        this.attached = IceObservable(this, false);
         this.on_dom = IceObservable(this, false);
 
         //Constructing a renderer always constructs its el.
@@ -79,6 +80,8 @@ Renderer = Ice.$extend('Renderer', {
         _.defer(_.bind(this.post_append, this), 0);
     },
     post_append: function() {
+        this.attached(true); // I am attached to something.
+        //I may or may not be on the dm.
         this.on_dom(this.$el.closest('html').length !== 0);
         if(this.on_dom()) {
             this.onAttach();
@@ -121,15 +124,16 @@ Renderer = Ice.$extend('Renderer', {
     _listen: function(obj) {
         this.listen(obj);
         this.bound = obj;
-        this.render();
+        this.render(obj);
     },
     listen: function(obj) {
         obj.evChanged.sub(this.onMutate, this);
     },
-    onMutate: function(die, obs, eargs) {
+    onMutate: function(rendered, eargs) {
         //console.log("OnMutate, self=", this.pretty());
+        //rendered === this.rendered()
         if(this.bound) {
-            this.render(die, obs, eargs);
+            this.render(rendered, eargs);
         }
     },
     render: function() {
@@ -144,7 +148,7 @@ Renderer = Ice.$extend('Renderer', {
     onAttach: function() {
         //console.log("OnAttach ", this.pretty())
         _.each(this, function(v, i, l) {
-            if(Ice.isa(v, Renderer) && !v.on_dom()) {
+            if(Ice.isa(v, Renderer) && v.attached() && !v.on_dom()) {
                 v.on_dom(true);
                 v.onAttach();
             }
