@@ -1,33 +1,37 @@
 $(function(){
-    TEMPLATES = new TemplateManager('#html_templates');
+    //TEMPLATES = new TemplateManager('#html_templates');
+    ShowFullErrorStacks();
+    MonkeypatchKoTemplateBinding();
 
-    sound_manifest = [
-    ];
-
-    createjs.Sound.registerManifest(sound_manifest);
-
-    settings = new Settings();
-    settings.load();
+    loadExternalKnockoutTemplates('/kot/', function() {
 
 
+        sound_manifest = [
+        ];
 
-    game = Proto.start_game();
-    scene = new Scene();
-    scene.game(game);
-    game.scene = scene;
-    game.sidebar = scene.sidebar;
+        createjs.Sound.registerManifest(sound_manifest);
+
+        settings = new Settings();
+        settings.load();
 
 
-    var body = $('body');
-    // console.log(body, scene.$el);
-    scene.appendTo(body);
-    //body.prepend(scene.$el);
 
-    /*help = Help();
-    if(settings.show_tutorial_on_start()) {
-        settings.show_tutorial_on_start(false);
-        help.open();
-    }*/
+        game = Proto.start_game();
+        //scene = new Scene();
+        //scene.game(game);
+        //game.scene = scene;
+        //game.sidebar = scene.sidebar;
+
+
+        var body = $('body');
+        // console.log(body, scene.$el);
+
+        console.log("Applying bindings to ", body[0]);
+        ko.applyBindings( window.game, body[0]);
+
+
+    });
+
 
 });
 
@@ -40,8 +44,9 @@ Proto = Ice.$extend('Proto', {
         this.load_game(blob);
 
         this.stack = Stack();
-        this.arena = IceObservable(this, null);
+        this.arena = ko.observable(null);
         this.arena(Arena());
+        this.something = ko.observable(3);
 
 
     },

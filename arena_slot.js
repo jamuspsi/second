@@ -2,11 +2,13 @@ ArenaSlot = Ice.$extend('ArenaSlot', {
     __init__: function(arena, row, col) {
         this.$super();
 
-        this.arena = arena;
-        this.row = row;
-        this.col = col;
+        this.arena = ko.observable(arena);
+        this.row = ko.observable(row);
+        this.col = ko.observable(col);
+        this.center = ko.observable(null);
+        this.pos = ko.observable(null);
 
-        this.mob = IceObservable(this, null);
+        this.mob = ko.observable(null);
 
         var self = this;
 

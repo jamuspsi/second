@@ -3,12 +3,12 @@ Mob = Ice.$extend('Mob', {
 
         this.$super();
 
-        this.health = IceObservable(this, 100);
-        this.max_health = IceObservable(this, 100);
+        this.health = ko.observable(100);
+        this.max_health = ko.observable(100);
         this.mana = new ManaPool();
 
-        this.name = IceObservable(this, chance.first());
-        this.portrait_url = IceObservable(this, '/images/badguy-white.png');
+        this.name = ko.observable(chance.first());
+        this.portrait_url = ko.observable('/images/badguy-white.png');
     }
 });
 
@@ -22,10 +22,12 @@ COLORS = [
 ];
 
 ManaPool = Ice.$extend('ManaPool', {
-    __init__: function() {
+    __init__: function(costs) {
         var self = this;
+        costs = costs || {};
+
         _.each(COLORS, function(color) {
-            self[color] = IceObservable(self, 100);
+            self[color] = ko.observable(self, costs[color] || 0);
         });
     }
 });

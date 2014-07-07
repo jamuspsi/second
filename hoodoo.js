@@ -1,4 +1,4 @@
-Hoodoo = Ice.$extend('Hoodoo', {
+Mech = Ice.$extend('Mech', {
     __init__: function() {
         this.$super();
         this.kind = 'BaseHoodoo';

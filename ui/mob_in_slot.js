@@ -36,3 +36,7 @@ MobInSlot = Renderer.$extend('MobInSlot', {
 // the mob's properties, which means a whole lot of stuff
 // would have to be resubscribed, potentially abusing the
 // renderer pattern.  No, this turned out to be a good idea.
+
+// The second answer was that knockout knocks the socks off of
+// Ice rendering and I'm migrating everything to it.  Ice is cool.
+// Knockout is great.  Ice + Knockout is magic.

@@ -1,0 +1,12 @@
+<div class="arena_frame">
+    <!-- ko foreach: {
+        data: arena.all_slots(),
+        as: 'slot'
+    }-->
+        <!-- ko template: {
+            data: slot,
+            name: LazyTemplate('/kot/', 'slot_frame.html')
+
+        }--><!-- /ko -->
+    <!-- /ko -->
+</div>
