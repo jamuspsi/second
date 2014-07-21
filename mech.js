@@ -83,67 +83,107 @@ but Stack manages it specially, only calling it once per execution.
 
 Ticker pushes turns and expirations/timers.
 
+But ticker shouldn't be a mech- that's extra exceptional behavior for no reason.
+I also think the pre and post steps don't qualify as mechs on their own.  They can be standardized
+steps made with a generator
+
+Oops.  Event dispatch HAS to go on the stack somehow, or at least be re-entrant.  Doh.
 */
 
-Mech = Ice.$extend('Mech', {
-    __init__: function(phases) {
+Mech = Query.$extend('Mech', {
+    __init__: function(starting_phase) {
         this.$super();
         var self = this;
 
-        if(self.$class !== PreMech && self.$class !== PostMech) {
-            self.phases = _.flatten([
-                [PreMech(self)],
-                phases,
-                [PostMech(self)]
-            ]);
-        }
 
-        this.phase = self.phases[0];
-        this.participants = [];
+        this.phase = ko.observable(starting_phase);
 
         this.redirected = null;
+
         this.stack = null; // Stack will put this on me.
         this.blocking = false;
-    },
-    // The stack always runs the top-most hoodoo unless it is blocked, and will always
-    // pop done hoodoos.  If this hoodoo is blocked on something *other than other hoodoos on the stack*,
-    // then it should set blocking.
-    run: function() {
-        if(this.phase === 'starting') {
-            this.phase = 'chance';
-        } else if (this.phase === 'chance') {
-            if(this.redirected) {
-                this.target = this.redirected;
-            } else {
-                this.phase = 'pre';
-            }
-        } else if (this.phase === 'pre') {
-            this.phase = 'execute';
-        } else if (this.phase === 'execute') {
-            //this.phase = 'post';
-            // Execute can last a while.  When execution has been called enough times, it needs to
-            // update phase.
-        } else if(this.phase === 'done') {
+        this.stale = true;
+        this.killed = false;
+        this.complete = false;
+        this.responders_by_phase = {};
 
+    },
+
+    run: function() {
+        var self = this;
+        self.stale = false;
+        var current_phase = self.phase();
+
+        self.announce(current_phase);
+
+        if(self.phase() === current_phase && !self.killed) {
+            _.bind(self[self.phase()], self)();
+        }
+    },
+    announce: function() {
+        var self = this;
+
+        var hook_name = self.$class.$name + '.' + self.current_phase();
+        return self.$super(hook_name);
+    },
+    fire_event: function(participant, hook_name, hook) {
+        var self = this;
+        if(participant.fired_hooks[hook_name]) {
+            return;
+        }
+        participant.fired_hooks[hook_name] = 1;
+        self.
+        hook(self);
+    },
+
+
+
+});
+
+Query = Ice.$extend('Query', {
+ __init__: function() {
+        this.$super();
+        var self = this;
+    },
+
+    run: function() {
+        var self = this;
+
+        self.announce();
+    },
+    announce: function(hook_name) {
+        var self = this;
+        self.stop_announcing = false;
+
+        if(!hook_name) {
+            hook_name = self.$class.$name;
         }
 
-        this[this.phase + '_phase']();
+        var participants = self.get_deep_participants();
+        for(var x=0; x< participants.length; x++) {
+            var p = participants[x];
+            if(p[hook_name]) {
+                self.fire_event(p, hook_name, _.bind(p[hook_name], p));
+            }
+            if(self.killed || self.stop_announcing) {
+                return;
+            }
+        }
     },
-
-    chance_phase: function() {
-
+    fire_event: function(participant, hook_name, hook) {
+        var self = this;
+        hook(self);
     },
-    pre_phase: function() {
-
+    participants: function() {
+        return [];
     },
-    execute_phase: function() {
-
-    },
-    post_phase: function() {
-
-    },
-    done_phase: function() {
-        return;  // stack will call the next thing, I'm not going to 'call up'.
+    deep_participants: function() {
+        var self = this;
+        return _.uniq(_.flatten(
+            _.map(self.participants(), function(p) {
+                return p.deep_participants();
+            })
+        ));
     }
 
 });
@@ -152,9 +192,25 @@ Participant = Ice.$extend('Participant', {
     __init__: function() {
         this.$super();
     },
-    get_effects: function() {
+    deep_participants: function(participants) {
+        var self = this;
+        if(participants === undefined) {
+            participants = [];
+        }
+
+        if(!_.contains(participants, self)) {
+            participants.push(self);
+        }
+        _.each(self.sub_participants(), function(sub) {
+            sub.deep_participants(participants);
+        });
+
+        return deep_participants;
+
+    },
+    sub_participants: function() {
         return [];
-    }
+    },
 });
 
 Effect = Ice.$extend('Effect', {
@@ -166,34 +222,108 @@ Effect = Ice.$extend('Effect', {
 
 
 Stack = Ice.$extend('Stack', {
-    __init__: function(hoodoo) {
+    __init__: function() {
         // Begin a new stack.
-        self.hoos = [];
+        self.mechs = [];
         // I am always executing the last one, right?
     },
-    push: function(hoo) {
-        self.hoos.push(hoo);
+    push: function(mech) {
+        self.mechs.push(mech);
     },
-    pop: function(hoo) {
-        if(self.hoos[self.hoos.length - 1] === hoo) {
-            self.hoos.pop();
+    pop: function(mech) {
+        if(self.mechs[self.mechs.length - 1] === mech) {
+            self.mechs.pop();
         }
     },
-    // Run as many hoos as possible until it is blocked.  That's
+    // Run as many mechs as possible until it is blocked.  That's
     // potentially a lot, but also potentially very few (because of animation blocking)
     run: function() {
+        // This can be called with _.defer to resume the stack.
+
         var self = this;
-        while(self.hoos.length) {
-            var current = self.hoos[self.hoos.length - 1];
-            if(current.blocked) {
-                break;
-            }
-            if(current.phase === 'done') {
+        while(self.mechs.length) {
+            var current = self.mechs[self.mechs.length - 1];
+            if(current.killed || current.complete) {
                 self.pop(current);
                 continue;
+            }
+            if(current.blocked || !current.stale) {
+                break;
             }
             current.run();
         }
     }
 
 });
+
+Conductor = Ice.$extend('Conductor', {
+    __init__: function() {
+        var self = this;
+        self.$super();
+        self.next_scheduled_task = null;
+        self.game_timer = 0;
+        self.stack = Stack();
+
+    },
+    tick: function(ms) {
+        var self = this;
+
+        // Time doesn't move while stuff's on the stack.
+        if(self.stack.mechs.length) {
+            self.stack.run();
+            return;
+        }
+
+
+        var nt = self.next_scheduled_task;
+        while(nt && nt.canceled) {
+            nt = self.next_scheduled_task = nt.next;
+        }
+
+        if(!nt) {
+            return;
+        }
+
+        var next_in = nt.run_at - self.game_timer;
+        if(next_in < ms) {
+            // Clamp the timer.  A tick can only be as long as the next scheduled thing
+            // to happen.
+            ms = next_in;
+        }
+
+        self.game_timer += ms;
+
+        self.next_scheduled_task = nt.next;
+        self.stack.push(nt.mech);
+        self.stack.run();
+    },
+    schedule: function(task, ms) {
+        var self = this;
+
+        task.run_at = self.game_timer + ms;
+        if(!self.next_scheduled_task || task.run_at < self.next_scheduled_task.run_at) {
+            task.next = self.next_scheduled_task;
+            self.next_scheduled_task = task;
+            return;
+        }
+        var walk = self.next_scheduled_task;
+
+        while(walk.next && walk.next.run_at <= task.run_at) {
+            walk = walk.next;
+        }
+        task.next = walk.next;
+        walk.next = task;
+    }
+});
+
+Task = Ice.$extend('Task', {
+    __init__: function() {
+        var self = this;
+        self.$super();
+
+        self.run_at = null;
+        self.next = null;
+        self.mech = null;
+    }
+});
+

@@ -16,13 +16,13 @@ Spell = Ice.$extend('Spell', {
 SpellCast = Mech.$extend('SpellCast', {
     __init__: function(caster, spell, targeting) {
         var self = this;
-        self.phases = [
+        /*self.phases = [
             'pre',
             'spend_mana',
             'execute_spell',
             'post'
-        ];
-        this.$super();
+        ];*/
+        this.$super('pre');
 
         self.targeting = ko.observable(targeting);
         self.spell = ko.observable(spell);
