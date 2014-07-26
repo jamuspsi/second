@@ -3,8 +3,9 @@
 	url = https://github.com/jamuspsi/classy.git
 [submodule "libs/underscore"]
 	path = libs/underscore
-	url = git@github.com:documentcloud/underscore
+	url = https://github.com/documentcloud/underscore.git
 [submodule "libs/icejs"]
 	path = libs/icejs
-	url = git@github.com:jamuspsi/icejs
+	url = https://github.com/jamuspsi/icejs.git
+
 
