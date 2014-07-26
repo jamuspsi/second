@@ -6,6 +6,7 @@
         <!-- ko foreach: {data: _.keys(bld.per_click()), as: 'currency' } -->
             <div>
                 <span data-bind="text: currency == 'money' ? '$' + format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency))
+                        : currency == 'bugs' ? format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency)) + ' bugs'
                         : format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency)) + game.indexed_buildings()[currency].name()">
                 </span> per click
             </div>
@@ -15,6 +16,7 @@
         <!-- ko foreach: {data: _.keys(bld.per_tick()), as: 'currency' } -->
             <div>
                 <span data-bind="text: currency == 'money' ? '$' + format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency))
+                        : currency == 'bugs' ? format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency)) + ' bugs'
                         : format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency)) + game.indexed_buildings()[currency].name()">
                 </span> per tick
             </div>
@@ -24,21 +26,47 @@
         <!-- ko if: bld.kind() === 'QA' -->
             <span data-bind="text: bld.qa_bonus().toFixed(2)"></span>x bonus to row.
         <!-- /ko -->
+        <!-- ko if: bld.key() === 'Programmer.1' -->
+            <div>
+                <span data-bind="text: bld.programmer_click_power()"></span> click power
+            </div>
+            <div>
+                <span data-bind="text: bld.programmer_autoclicks_per_tick()"></span> autoclicks/sec
+            </div>
+        <!-- /ko -->
     </div>
-    <div class="upgrade_row">
-        <span class="upgrade" data-bind="text: bld.upgrade_bonus()"></span>x power
-        <!-- ko if: bld.upgrade_cost() <= game.money() -->
+    <div class="upgrade_row" data-bind="visible: bld.unlocked()">
+        <span class="upgrade" data-bind="text: bld.upgrade_bonus().toFixed(2)"></span>x power
+        <!-- ko if: bld.can_upgrade() -->
 
             (<a class="upgrade_link" href="javascript: void" data-bind="click: function(bld, eargs) {
                                     eargs.preventDefault();
                                     bld.upgrade();
                                 }
-            "><span  data-bind="text: '$' + format_number(bld.upgrade_cost())">
+            "><i data-bind="
+                css: function(bld) {
+                    if(bld.upgrade_currency() === 'money') {
+                        return 'icon-dollar';
+                    }
+                    if(bld.upgrade_currency() === 'bugs') {
+                        return 'icon-bug';
+                    }
+                }(bld)
+            "></i><span data-bind="text: format_number(bld.upgrade_cost())">
                 </span></a>)
         <!-- /ko -->
-        <!-- ko if: bld.upgrade_cost() > game.money() -->
-            <span class="upgrade_link" data-bind="text: '$' + format_number(bld.upgrade_cost())">
-            </span>
+        <!-- ko if: ! bld.can_upgrade() -->
+            <span class="upgrade_link"><i data-bind="
+                css: function(bld) {
+                    if(bld.upgrade_currency() === 'money') {
+                        return 'icon-dollar';
+                    }
+                    if(bld.upgrade_currency() === 'bugs') {
+                        return 'icon-bug';
+                    }
+                }(bld)
+            "></i><span data-bind="text: format_number(bld.upgrade_cost())">
+            </span></span>
 
         <!-- /ko -->
     </div>

@@ -4,7 +4,7 @@ Building = Ice.$extend('Building', {
         self.$super();
         self.tier = ko.observable(opts.tier || 1);
         self.kind = ko.observable(opts.kind || 'Shacks');
-        self.name = ko.observable(opts.name || ('Lv' + self.tier() + ' ' + self.kind()));
+        self.name = ko.observable(opts.name || (BUILDING_NAMES[self.kind() + '.' + self.tier()]));
 
         self.unlocked = ko.observable(opts.unlocked || false);
         self.purchased = ko.observable(opts.qty || 0);
@@ -12,6 +12,7 @@ Building = Ice.$extend('Building', {
         self.cost = ko.observable(opts.cost || Math.pow(100, self.tier()));
         self.proof_cost = ko.observable(opts.proof_cost || 0);
 
+        self.upgrade_currency = ko.observable(opts.upgrade_currency || 'money');
         self.upgrade_cost = ko.observable(opts.upgrade_cost || Math.pow(1000000, self.tier()-1));
         self.upgrade_bonus = ko.observable(1);
 
@@ -93,16 +94,21 @@ Building = Ice.$extend('Building', {
         }
         return classes;
     },
+    can_upgrade: Ice.kocomputed(function() {
+        if(!lazy_game()) return;
+        var self = this;
+        return self.upgrade_cost() < game[self.upgrade_currency()]();
+    }),
     upgrade: function() {
         var self = this;
         var upgrade_cost_factor = 10;
-        var upgrade_bonus_factor = 2;
-        if(game.money() < self.upgrade_cost()) {
+        var cash_obs = game[self.upgrade_currency()];
+        if(cash_obs() < self.upgrade_cost()) {
             return;
         }
-        game.money(game.money() - self.upgrade_cost());
+        cash_obs(cash_obs() - self.upgrade_cost());
         self.upgrade_cost(self.upgrade_cost() * upgrade_cost_factor);
-        self.upgrade_bonus(self.upgrade_bonus() + upgrade_bonus_factor);
+        self.upgrade_bonus(self.upgrade_bonus() + game.upgrade_effectiveness());
 
         game.throttled_save();
     },
@@ -137,28 +143,36 @@ Building = Ice.$extend('Building', {
         if(self.kind == 'QA') {
             return self.upgrade_bonus();
         } else {
-            var qa = game.indexed_buildings()['QA.' + self.tier()];1;
+            var qa = game.indexed_buildings()['QA.' + self.tier()];
             return self.upgrade_bonus() * qa.qa_bonus();
         }
     },
     qa_bonus: function() {
         var self = this;
 
-        if(self.qty() == 0) return 1;
+        if(self.qty() === 0) {
+            return 1;
+        }
         return 1 + Math.log(self.qty() * self.upgrade_bonus()) / log10;
+    },
+    programmer_click_power: function() {
+        var self = this;
+        if(!self.qty()) { return 0; }
+        return Math.floor(Math.log(self.qty()) / log100);
+    },
+    programmer_autoclicks_per_tick: function() {
+        var self = this;
+        if(!self.qty()) { return 0; }
+        return Math.floor(Math.log(self.qty()) / log100);
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
         return Math.pow(100, self.tier());
-        //return Math.pow(100, Math.pow(2, self.tier()) - 1);
-        return 100;
-        return 100 * self.next.upgrade_bonus();
-        return Math.pow(100, Math.pow(2, self.tier()) + 1);
+
     }),
     integrate: function() {
         var self = this;
         var ifactor = self.ifactor();
-        //ifactor = 1000;
         var next = self.next;
 
 
@@ -170,7 +184,6 @@ Building = Ice.$extend('Building', {
 
         self.qty(0);
 
-        //self.qty(self.qty() - will_integrate * ifactor);
         next.qty(next.qty() + will_integrate);
         next.unlocked(true);
 
@@ -204,28 +217,33 @@ BUILDINGS = [
     {
         kind: 'QA',
         tier: 1,
+        upgrade_currency: 'bugs',
     },
     {
         kind: 'Programmer',
         tier: 1,
+        upgrade_currency: 'bugs',
     },
     {
-        kind: 'DBA',
+        kind: 'DB',
         tier:1,
         per_tick: {'money': 10},
+    },
+    {
+        kind: 'User',
+        tier: 1,
+        per_tick: {'bugs': 1},
     }
-
-
-
 ];
 
-_.each(['IT', 'QA', 'Programmer', 'DBA'], function(kind) {
+_.each(['IT', 'QA', 'Programmer', 'DB', 'User'], function(kind) {
     for(var x=2;x<=8;x++) {
         var bld = {
             kind: kind,
             tier: x,
             per_click: {},
             per_tick: {},
+            upgrade_currency: kind === 'Programmer' || kind === 'QA' ? 'bugs' : 'money'
         };
         var prevkey = kind + '.' + (x-1);
         if(kind === 'IT') {
@@ -236,3 +254,52 @@ _.each(['IT', 'QA', 'Programmer', 'DBA'], function(kind) {
         BUILDINGS.push(bld);
     }
 });
+
+BUILDING_NAMES = {
+    'IT.1': 'Nephew',
+    'IT.2': 'Rent-A-Geek',
+    'IT.3': 'Manuals',
+    'IT.4': 'Help Desk',
+    'IT.5': 'IT Consultant',
+    'IT.6': 'Server Admin',
+    'IT.7': 'Cloud Architect',
+    'IT.8': 'Tim Berners-Lee',
+
+    'QA.1': 'Red Pens',
+    'QA.2': 'Print Preview',
+    'QA.3': 'Frequent Backups',
+    'QA.4': 'Peer Review',
+    'QA.5': 'CVS',
+    'QA.6': 'SVN',
+    'QA.7': 'Hg',
+    'QA.8': 'Git',
+
+    'Programmer.1': 'Will Wright',
+    'Programmer.2': 'Richard Bartle',
+    'Programmer.3': 'Peter Molyneux',
+    'Programmer.4': 'Bjarne Strossup',
+    'Programmer.5': 'Guido Van Rossum',
+    'Programmer.6': 'Grace Hopper',
+    'Programmer.7': 'Ada Lovelace',
+    'Programmer.8': 'Alan Turing',
+
+    'DB.1': 'Trapper Keeper',
+    'DB.2': 'BDB',
+    'DB.3': 'SQLite',
+    'DB.4': 'Oracle',
+    'DB.5': 'NoSQL',
+    'DB.6': 'MySQL',
+    'DB.7': 'Postgres',
+    'DB.8': 'TSQL',
+
+    'User.1': 'YouTube User',
+    'User.2': 'Trained Monkey',
+    'User.3': 'Forum Troll',
+    'User.4': '"Enthusiast"',
+    'User.5': 'John Q. Public',
+    'User.6': 'OEM',
+    'User.7': 'Casual Debugger',
+    'User.8': 'Chaos Monkey'
+
+
+};

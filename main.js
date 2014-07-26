@@ -1,5 +1,23 @@
 $(function(){
-    //TEMPLATES = new TemplateManager('#html_templates');
+    /* https://gist.github.com/AndreasBriese/1670507 */
+    _.mixin({
+        sum: function(obj, iterator, context) {
+        if (!iterator && _.isEmpty(obj)) return 0;
+        var result = 0;
+        if (!iterator && _.isArray(obj)){
+            for(var i=obj.length-1;i>-1;i-=1){
+                result += obj[i];
+            }
+          return result;
+        }
+        _.each(obj, function(value, index, list) {
+            var computed = iterator ? iterator.call(context, value, index, list) : value;
+            result += computed;
+        });
+        return result;
+      }
+    });
+
     ShowFullErrorStacks();
     MonkeypatchKoTemplateBinding();
 
@@ -15,13 +33,12 @@ $(function(){
         settings.load();
 
 
-
+        lazy_game = ko.observable(null);
         game = Second.start_game();
+        lazy_game(game);
 
         var body = $('#game');
-        // console.log(body, scene.$el);
 
-        console.log("Applying bindings to ", body[0]);
         ko.applyBindings( window.game, body[0]);
 
 
@@ -31,9 +48,15 @@ $(function(){
 });
 
 log10 = Math.log(10);
+log100 = Math.log(100);
 log1000 = Math.log(1000);
-NUMBER_SUFFIXES = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "Nn", "Dc", "UDc", "DDc", "TDc", "QaDc", "QtDc", "SxDc", "SpDc", "ODc", "NDc", "Vi", "UVi", "DVi", "TVi", "QaVi", "QtVi", "SxVi", "SpVi", "OcVi", "NnVi", "Tg", "UTg", "DTg", "TTg", "QaTg", "QtTg", "SxTg", "SpTg", "OcTg", "NnTg", "Qd",
-                       "UQd", "DQd", "TQd", "QaQd", "QtQd", "SxQd", "SpQd", "OcQd", "NnQd", "Qq", "UQq", "DQq", "TQq", "QaQq", "QtQq", "SxQq", "SpQq", "OcQq", "NnQq", "Sg"
+NUMBER_SUFFIXES = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "Nn",
+                   "Dc", "UDc", "DDc", "TDc", "QaDc", "QtDc", "SxDc", "SpDc", "ODc", "NDc",
+                   "Vi", "UVi", "DVi", "TVi", "QaVi", "QtVi", "SxVi", "SpVi", "OcVi", "NnVi",
+                   "Tg", "UTg", "DTg", "TTg", "QaTg", "QtTg", "SxTg", "SpTg", "OcTg", "NnTg",
+                   "Qd", "UQd", "DQd", "TQd", "QaQd", "QtQd", "SxQd", "SpQd", "OcQd", "NnQd",
+                   "Qq", "UQq", "DQq", "TQq", "QaQq", "QtQq", "SxQq", "SpQq", "OcQq", "NnQq",
+                   "Sg"
 ];
 function format_number(num) {
     if(num < 1000) {
@@ -52,6 +75,7 @@ function format_number(num) {
 }
 
 
+
 Second = Ice.$extend('Second', {
     __init__: function(blob) {
         var self = this;
@@ -60,19 +84,17 @@ Second = Ice.$extend('Second', {
         self.buildings = ko.observableArray([]);
         self.money = ko.observable(100);
         self.bugs = ko.observable(0);
-        self.integrating = ko.observable(false);
+        self.upgrade_effectiveness = ko.observable(1);
+        self.total_clicks = ko.observable(0);
+        self.total_ticks = ko.observable(0);
 
 
         self.load_game(blob);
         self.tick_interval = window.setInterval(_.bind(self.tick, self), 500);
         self.refresh_interval = window.setInterval(_.bind(self.refresh_integrate_display, self), 500);
+        self.autosave_interval = window.setInterval(_.bind(self.save_game, self), 60000);
+        self.autoclickinterval = window.setInterval(_.bind(self.autoclick, self), 1000);
 
-        self.total_clicks = ko.observable(0);
-        self.total_ticks = ko.observable(0);
-
-        /*self.autoclick_interval = window.setInterval(function() {
-            self.button_click(100);
-        }, 200);*/
 
     },
     indexed_buildings: Ice.kocomputed(function() {
@@ -89,23 +111,35 @@ Second = Ice.$extend('Second', {
     }),
     button_click: function(num) {
         var self = this;
+        if(!num) {
+            var prog = self.indexed_buildings()['Programmer.1'];
+            num = prog.programmer_click_power();
+        }
         self.total_clicks(self.total_clicks() + num);
+        click_each = function(bld) { bld.click(); };
+
         for(var x=0;x<num;x++) {
-            _.each(self.buildings_by_tier(), function(bld) {
-                bld.click();
-            });
+            _.each(self.buildings_by_tier(), click_each);
         }
     },
     tick: function() {
-//        console.log('Tick!');
         var self = this;
         self.total_ticks(self.total_ticks() + 1);
         _.each(self.buildings_by_tier(), function(bld) {
             bld.tick();
         });
 
-        if(self.integrating()) {
-            self.integrate();
+
+    },
+    autoclick: function() {
+        var self = this;
+
+        var prog = self.indexed_buildings()['Programmer.1'];
+        //This got exponential REAL fast.
+        //var autoclicks = prog.programmer_autoclicks_per_tick() * prog.programmer_click_power();
+        var autoclicks = prog.programmer_autoclicks_per_tick();
+        if(autoclicks) {
+            self.button_click(autoclicks);
         }
     },
     integrate: function(target) {
@@ -156,7 +190,6 @@ Second = Ice.$extend('Second', {
                 var bld = self.indexed_buildings()[kind + '.' + tier];
                 if(!bld) return;
                 if(!bld.prev) {
-                    //console.log("Can't build because no prev: ", bld);
                     bld.integrates_to(0);
                     return;
                 }
@@ -172,10 +205,33 @@ Second = Ice.$extend('Second', {
             });
         });
     },
+    can_prestige: Ice.kocomputed(function() {
+        var self = this;
+        if(!self.buildings) { return false; }
+        return !!_.sum(self.buildings(), function(bld) {
+            return bld.tier() >= 4 ? bld.qty() : 0;
+        });
+    }),
+    prestige_preview: Ice.kocomputed(function() {
+        var self = this;
 
-    get_multiplier: function(mode, currency, bld) {
-        return 1.0 * bld.upgrade_bonus();
-    },
+        if(!self.can_prestige()) {
+            return 0;
+        }
+        var tiers_reached = {};
+        _.each(self.buildings(), function(bld) {
+            if(!bld.qty() || bld.tier() < 4) return;
+            if(!tiers_reached[bld.kind()] || tiers_reached[bld.kind()] < bld.tier()) {
+                tiers_reached[bld.kind()] = bld.tier();
+            }
+        });
+
+        return _.sum(tiers_reached, function(tier) {
+            return Math.pow(tier-3, 2) * 0.01;
+        });
+    }),
+
+
     throttled_save: function() {
         var self = this;
         _.debounce(_.bind(self.save_game, self), 1000)();
@@ -186,11 +242,17 @@ Second = Ice.$extend('Second', {
         var blob = {
             building_qtys: {},
             money: self.money(),
+            bugs: self.bugs(),
+            upgrade_effectiveness: self.upgrade_effectiveness(),
+            total_ticks: self.total_ticks(),
+            total_clicks: self.total_clicks(),
+
             buildings: {}
         };
         _.each(self.buildings(), function(bld) {
             blob.buildings[bld.key()] = {
                 qty: bld.qty(),
+                unlocked: bld.unlocked(),
                 upgrade_cost: bld.upgrade_cost(),
                 upgrade_bonus: bld.upgrade_bonus()
             };
@@ -203,26 +265,20 @@ Second = Ice.$extend('Second', {
     load_game: function(blob) {
         var self = this;
         var new_buildings = [];
-        console.log('Going to push BUILDINGS: ', BUILDINGS);
         _.each(BUILDINGS, function(bld) {
             new_buildings.push(Building(bld));
         });
         self.buildings(new_buildings);
         self.refresh_building_links();
 
-
-        /*
-        _.each(blob.buildings || [], function(bld) {
-            _.each(bld.__keys__(), function(key) {
-                self.indexed_buildings()[key]( bld[key]() );
-            });
-        });*/
-        self.money(blob.money);
+        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks'], function(attr) {
+            self[attr](blob[attr]);
+        });
 
         _.each(blob.buildings || {}, function(bld_blob, key) {
-            console.log(self.indexed_buildings(), key);
             var bld = self.indexed_buildings()[key];
-            _.each(['qty', 'upgrade_cost', 'upgrade_bonus'], function(attr) {
+            if(!bld) return;
+            _.each(['qty', 'upgrade_cost', 'upgrade_bonus', 'unlocked'], function(attr) {
                 if(bld_blob[attr] !== undefined) {
                     bld[attr](bld_blob[attr]);
                 }
@@ -231,20 +287,54 @@ Second = Ice.$extend('Second', {
 
     },
     new_game_plus: function() {
-        var blob = JSON.parse(JSON.stringify(Second.new_game_blob));
+        var self = this;
+        if(!self.can_prestige()) return;
 
-        // Copy things onto blob that you want to keep.
+        var blob = JSON.parse(JSON.stringify(Second.new_game_blob));
+        blob.total_clicks = self.total_clicks();
+        blob.total_ticks = self.total_ticks();
+        blob.upgrade_effectiveness = self.upgrade_effectiveness() + self.prestige_preview();
 
         this.load_game(blob);
 
-    }
+    },
+    wipe_save: function() {
+        var self = this;
+        if(!window.confirm("Are you sure?  This IS NOT PRESTIGE.  You're going to lose everything.  Press OK to Prestige, Cancel to stop.")) {
+            return;
+        }
+        if(!window.confirm("I can't help it.  Are you REALLY SURE you want to LOSE ALL PROGRESS and START OVER?  Press OK to start from scratch, Cancel to keep going.")) {
+            return;
+        }
+        self.load_game(Second.new_game_blob);
+    },
 
 });
 
 
 Second.new_game_blob = {
     money: 0,
+    bugs: 0,
+    upgrade_effectiveness: 1,
+    total_ticks: 0,
+    total_clicks: 0,
     buildings: {
+        'IT.1': {
+            unlocked: true
+        },
+        'QA.1': {
+            unlocked: true
+        },
+        'Programmer.1': {
+            unlocked: true
+        },
+        'DBA.1': {
+            unlocked: true
+        },
+        'User.1': {
+            unlocked: true
+        },
+
         'IT.2': {
             qty: 1
         },
@@ -255,6 +345,9 @@ Second.new_game_blob = {
             qty: 1
         },
         'DBA.2': {
+            qty: 1
+        },
+        'User.2': {
             qty: 1
         }
     }
