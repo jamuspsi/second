@@ -288,6 +288,9 @@ Second = Ice.$extend('Second', {
         if(self.indexed_buildings()['DB.2'].qty() === 0) {
             self.indexed_buildings()['DB.2'].qty(1); //oops
         }
+        if(!self.indexed_buildings()['DB.1'].unlocked()) {
+            self.indexed_buildings()['DB.1'].unlocked(true); //oops
+        }
 
     },
     new_game_plus: function() {
