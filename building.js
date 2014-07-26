@@ -86,7 +86,7 @@ Building = Ice.$extend('Building', {
         var self = this;
 
         var classes = "";
-        if(self.upgrade_cost() < game.money()) {
+        if(self.can_upgrade()) {
             classes += ' upgrade_ready';
         }
         if(self.can_integrate()) {
@@ -97,6 +97,7 @@ Building = Ice.$extend('Building', {
     can_upgrade: Ice.kocomputed(function() {
         if(!lazy_game()) return;
         var self = this;
+        if(!self.unlocked()) return false;
         return self.upgrade_cost() < game[self.upgrade_currency()]();
     }),
     upgrade: function() {
