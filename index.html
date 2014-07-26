@@ -33,32 +33,22 @@
     <script src="keybindings.js"></script>
     <script src="settings.js"></script>
 
-    <script src="mob.js"></script>
-    <script src="mech.js"></script>
-    <script src="spell.js"></script>
-    <script src="arena.js"></script>
-    <script src="arena_slot.js"></script>
+    <script src="building.js"></script>
 
-    <!-- ui
-    <script src="ui/arena_frame.js"></script>
-    <script src="ui/slot_frame.js"></script>
-    <script src="ui/scene.js"></script>
-    <script src="ui/mob_in_slot.js"></script>
-    -->
 
 
 </head>
 <body>
 
-    <!-- ko if: game.arena() -->
-        <!-- ko template: {
-            name: LazyTemplate('/kot/', 'arena_frame.html'),
-            data: game.arena(),
-            as: 'arena'
-        }--><!-- /ko -->
-    <!-- /ko -->
 
     <script kot="not_loaded_yet.html"></script>
+    <div id="game" data-bind="
+    template: {
+        name: LazyTemplate('/kot/', 'main.html'),
+        data: game,
+        as: 'game',
+    }
+    "></div>
 
 </body>
 </html>

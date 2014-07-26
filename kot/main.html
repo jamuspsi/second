@@ -1,0 +1,192 @@
+<div class="balances">
+    <table>
+        <tr>
+            <th>Money</th>
+            <th>Per Click</th>
+            <th>Per Tick</th>
+        </tr>
+        <tr>
+            <td data-bind="text: '$' + format_number(game.money())"></td>
+            <td data-bind="text: '$' + format_number(game.indexed_buildings()['IT.1'].qty() * indexed_buildings()['IT.1'].get_multiplier('click', 'money') )"></td>
+            <td data-bind="text: '$' + format_number(game.indexed_buildings()['DBA.1'].qty() * 10 * game.indexed_buildings()['DBA.1'].get_multiplier('tick', 'money'))"></td>
+        </tr>
+        <tr>
+            <th>Total Clicks:</th>
+            <td data-bind="text: game.total_clicks()"></td>
+            <th>Total Ticks:</th>
+            <td data-bind="text: game.total_ticks()"></td>
+        </tr>
+    </table>
+</div>
+
+<div class="button_holder">
+    <button data-bind="
+        click: function(data, eargs) {
+            eargs.preventDefault();
+            game.button_click(1);
+        }
+    ">
+        Click For Money
+    </button>
+    <button data-bind="
+        click: function(data, eargs) {
+            eargs.preventDefault();
+            //game.integrating(!game.integrating());
+            game.integrate();
+        },
+        text: game.integrating() ? 'Derive!' : 'Integrate!'
+    "></button>
+    <button data-bind="
+        click: function(data, eargs) {
+            eargs.preventDefault();
+            game.save_game();
+        },
+    ">Save Game</button>
+    <button data-bind="
+        click: function(data, eargs) {
+            eargs.preventDefault();
+            game.new_game_plus();
+        },
+    ">New Game+</button>
+</div>
+
+<div class="building_list">
+    <table>
+        <tbody>
+        <!-- ko foreach: {
+                data: game.tiers(),
+                 as: 'tier'
+             } -->
+        <tr>
+            <!-- ko foreach: {
+                    data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
+                    as: 'bld'
+                }-->
+                <!-- ko if: bld -->
+                <td class="building" data-bind="css: bld.css()">
+                    <!-- ko template: {
+                        name: LazyTemplate('/kot/', 'building.html'),
+                        data: bld,
+                        as: 'bld'
+                    }-->
+                    <!-- /ko -->
+                </td>
+                <!-- /ko -->
+                <!-- ko if: !bld -->
+                <td>
+                    <span>I really can't see this ever happening, but the original idea for this game was to auto-generate higher tiers, and I might someday go back to that.</span></td>
+
+                <!-- /ko -->
+            <!-- /ko -->
+
+        </tr>
+        <!-- /ko -->
+    </tbody>
+    </table>
+</div>
+
+
+
+
+
+
+
+
+
+<div class="building_list">
+    <table borders=1 style="border: 1px solid white">
+        <thead>
+            <tr>
+                <!-- ko foreach: {
+                    data: game.kinds(),
+                    as: 'kind'
+                }-->
+                <th colspan="4" data-bind="text: kind"></th>
+                <!-- /ko -->
+            </tr>
+            <tr>
+                <th>Lv</th>
+                <!-- ko foreach: {
+                    data: game.kinds(),
+                    as: 'kind'
+                }-->
+
+                <th>Qty</th>
+                <th>Power</th>
+                <th>Upgrade</th>
+                <th><strong>&int;</strong></th>
+                <!-- /ko -->
+            </tr>
+
+        </thead>
+        <tbody data-bind="
+            foreach: {
+                data: game.tiers(),
+                 as: 'tier'
+             }">
+            <tr>
+                <td data-bind="text: tier"></td>
+                <!-- ko foreach: {
+                    data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
+                    as: 'bld'
+                }-->
+
+                <td data-bind="text: format_number(bld.qty())"></td>
+                <td>
+                    <span data-bind="text: format_number(bld.upgrade_bonus())"></span>x
+                </td>
+                <td>
+                    <!-- ko if: bld.qty() > 0 -->
+                        <button data-bind="click: function(bld, eargs) {
+                                eargs.preventDefault();
+                                bld.upgrade();
+                            };
+                        ">
+                            <span data-bind="text: '$' + format_number(bld.upgrade_cost())"></span>
+                        </button>
+                    <!-- /ko -->
+
+                </td>
+                <td>
+                    <!-- ko if: bld.tier() !== 1 && bld.can_integrate() -->
+                        <button data-bind="
+                            click: function(bld, eargs) {
+                                eargs.preventDefault(0);
+                                game.integrate(bld);
+                            }
+                        ">
+                            <strong>&int;</strong>
+                            <span data-bind="    text: format_number(bld.integrates_to())"></span>
+                        </button>
+                    <!-- /ko -->
+                </td>
+
+                <!-- /ko -->
+            </tr>
+            <tr>
+                <td></td>
+                <!-- ko foreach: {
+                    data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
+                    as: 'bld'
+                }-->
+
+                <td colspan="4">
+                    <!-- ko foreach: {data: _.keys(bld.per_click()), as: 'currency' } -->
+                        <span data-bind="text: currency == 'money' ? '$' + bld.per_click()[currency]
+                                    : (bld.per_click()[currency] === 1 ? '' : bld.per_click()[currency] + ' ') + game.indexed_buildings()[currency].name()"></span> per click
+
+                    <!-- /ko -->
+
+                    <!-- ko foreach: {data: _.keys(bld.per_tick()), as: 'currency' } -->
+                        <span data-bind="text: currency == 'money' ? '$' + bld.per_tick()[currency]
+                                    : (bld.per_tick()[currency] === 1 ? '' : bld.per_tick()[currency] + ' ') + game.indexed_buildings()[currency].name()"></span> per tick
+
+                    <!-- /ko -->
+
+                </td>
+
+                <!-- /ko -->
+            </tr>
+        </tbody>
+    </table>
+</div>
