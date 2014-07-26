@@ -328,7 +328,7 @@ Second.new_game_blob = {
         'Programmer.1': {
             unlocked: true
         },
-        'DBA.1': {
+        'DB.1': {
             unlocked: true
         },
         'User.1': {
@@ -344,7 +344,7 @@ Second.new_game_blob = {
         'Programmer.2': {
             qty: 1
         },
-        'DBA.2': {
+        'DB.2': {
             qty: 1
         },
         'User.2': {
