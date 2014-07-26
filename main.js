@@ -59,7 +59,7 @@ Second = Ice.$extend('Second', {
         self.$super();
         self.buildings = ko.observableArray([]);
         self.money = ko.observable(100);
-        self.proofs = ko.observable(0);
+        self.bugs = ko.observable(0);
         self.integrating = ko.observable(false);
 
 

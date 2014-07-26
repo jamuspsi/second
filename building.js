@@ -53,20 +53,20 @@ Building = Ice.$extend('Building', {
          //Reduce rendering overhead.
 
         var money = game.money();
-        var proofs = game.proofs();
+        var bugs = game.bugs();
         var cost = self.cost();
         var proof_cost = self.proof_cost();
         var qty = self.qty();
 
         while(amt >= 1) {
 
-            if(money < cost || proofs < proof_cost) {
+            if(money < cost || bugs < proof_cost) {
                 console.log("Cannot afford more.");
                 return;
             }
 
             money -= self.cost();
-            proofs -= self.proof_cost();
+            bugs -= self.proof_cost();
 
             cost *= self.cost_factor();
             proof_cost *= self.proof_cost_factor();
@@ -76,7 +76,7 @@ Building = Ice.$extend('Building', {
         }
 
         game.money(money);
-        game.proofs(proofs);
+        game.bugs(bugs);
         self.qty(qty);
         self.cost(cost);
         self.proof_cost(proof_cost);
@@ -110,7 +110,7 @@ Building = Ice.$extend('Building', {
         var self = this;
         _.each(self.per_tick(), function(amt, currency) {
             var mult = self.get_multiplier('tick', currency);
-            if(currency === 'money' || currency === 'proofs') {
+            if(currency === 'money' || currency === 'bugs') {
                 game[currency](game[currency]() + mult * amt * self.qty());
             } else {
                 var bld = game.indexed_buildings()[currency];
@@ -123,7 +123,7 @@ Building = Ice.$extend('Building', {
         var self = this;
         _.each(self.per_click(), function(amt, currency) {
             var mult = self.get_multiplier('tick', currency);
-            if(currency === 'money' || currency === 'proofs') {
+            if(currency === 'money' || currency === 'bugs') {
                 game[currency](game[currency]() + mult * amt * self.qty());
             } else {
                 var bld = game.indexed_buildings()[currency];
