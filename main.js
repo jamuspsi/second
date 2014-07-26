@@ -285,6 +285,10 @@ Second = Ice.$extend('Second', {
             });
         });
 
+        if(self.indexed_buildings()['DB.2'].qty() === 0) {
+            self.indexed_buildings()['DB.2'].qty(1); //oops
+        }
+
     },
     new_game_plus: function() {
         var self = this;
