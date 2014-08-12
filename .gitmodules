@@ -4,3 +4,7 @@
 [submodule "libs/underscore"]
 	path = libs/underscore
 	url = git@github.com:documentcloud/underscore
+[submodule "libs/icejs"]
+	path = libs/icejs
+	url = git@github.com:jamuspsi/icejs
+
