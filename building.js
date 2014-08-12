@@ -158,8 +158,8 @@ Building = Ice.$extend('Building', {
     },
     programmer_click_power: function() {
         var self = this;
-        if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty()) / log100);
+        if(!self.qty()) { return 1; }
+        return Math.max(1, Math.floor(Math.log(self.qty()) / log100));
     },
     programmer_autoclicks_per_tick: function() {
         var self = this;
