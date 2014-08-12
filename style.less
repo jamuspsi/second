@@ -1,13 +1,48 @@
 
-@xp_color: #B000B0;
-@bp_color: #5656EB;
-@gold_color: gold;
-
-
 body {
- background-color: #272822;
- color: #f0f0f0;
+    background-color: #272822;
+
+    color: #f0f0f0;
+    #game {
+        .building {
+            a.upgrade_link, a.integrate_link {
+                color: limegreen;
+            }
+            &.integration_ready {
+                background-color: #111100;
+            }
+            &.upgrade_ready {
+                background-color: #001100;
+            }
+            &.upgrade_ready.integration_ready {
+                background-color: #112200;
+            }
+        }
+    }
 }
+
+body.theme_blackboard {
+    background-color: #272822;
+    #game {
+        color: #f0f0f0;
+        .building {
+            a.upgrade_link, a.integrate_link {
+                color: limegreen;
+            }
+            &.integration_ready {
+                background-color: #111100;
+            }
+            &.upgrade_ready {
+                background-color: #001100;
+            }
+            &.upgrade_ready.integration_ready {
+                background-color: #112200;
+            }
+        }
+    }
+}
+
+
 
 .building_list table {
 
@@ -43,17 +78,8 @@ body {
 
     a.upgrade_link, a.integrate_link {
         text-decoration: none;
-        color: limegreen;
     }
-    &.integration_ready {
-        background-color: #111100;
-    }
-    &.upgrade_ready {
-        background-color: #001100;
-    }
-    &.upgrade_ready.integration_ready {
-        background-color: #112200;
-    }
+
 }
 
 .help {
