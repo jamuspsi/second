@@ -82,6 +82,7 @@ Analytics = Ice.$extend('Analytics', {
         self.ticks = 0;
         self.clicks = 0;
         self.pulse_interval = window.setInterval(_.bind(self.pulse, self), 60000);
+        self.pulse();
     },
     pulse: function(category, action, label, value) {
         var self = this;
@@ -112,7 +113,7 @@ Analytics = Ice.$extend('Analytics', {
     },
     report_prestige: function(earned_bonus) {
         var self = this;
-        self.send_event('gameplay', 'prevstige', 'earned_bonus', Math.floor(earned_bonus*100));
+        self.send_event('gameplay', 'prestige', 'earned_bonus', Math.floor(earned_bonus*100));
     }
 
 });
