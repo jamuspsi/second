@@ -189,7 +189,10 @@ Building = Ice.$extend('Building', {
         self.qty(0);
 
         next.qty(next.qty() + will_integrate);
-        next.unlocked(true);
+        if(!next.unlocked()) {
+            next.unlocked(true);
+            icea.report_unlocked_tier(next.kind(), next.tier());
+        }
 
 
     },

@@ -32,6 +32,7 @@ $(function(){
         settings = new Settings();
         settings.load();
 
+        icea = Analytics();
 
         lazy_game = ko.observable(null);
         game = Second.start_game();
@@ -74,7 +75,47 @@ function format_number(num) {
 
 }
 
+Analytics = Ice.$extend('Analytics', {
+    __init__: function() {
+        var self = this;
+        self.$super();
+        self.ticks = 0;
+        self.clicks = 0;
+        self.pulse_interval = window.setInterval(_.bind(self.pulse, self), 60000);
+    },
+    pulse: function(category, action, label, value) {
+        var self = this;
+        self.report_idle();
+    },
 
+    /*
+        'gameplay', 'unlocked_tier', kind, tier
+        'gameplay', 'prestige', 'earned_bonus', prestige_preview
+        'gameplay', 'checkin', 'idle', 1
+    */
+    send_event: function(category, action, label, value) {
+        try {
+            if(!ga) {
+                return;
+            }
+            ga('send', 'event', category, action, label, value||1);
+
+        } catch(e) {}
+    },
+    report_unlocked_tier: function(kind, tier) {
+        var self = this;
+        self.send_event('unlocked_tier', kind, 'tier_' + tier, 1);
+    },
+    report_idle: function() {
+        var self = this;
+        self.send_event('gameplay', 'checkin', 'idle', 1);
+    },
+    report_prestige: function(earned_bonus) {
+        var self = this;
+        self.send_event('gameplay', 'prevstige', 'earned_bonus', Math.floor(earned_bonus*100));
+    }
+
+});
 
 Second = Ice.$extend('Second', {
     __init__: function(blob) {
@@ -296,6 +337,8 @@ Second = Ice.$extend('Second', {
     new_game_plus: function() {
         var self = this;
         if(!self.can_prestige()) return;
+
+        icea.report_prestige(self.prestige_preview());
 
         var blob = JSON.parse(JSON.stringify(Second.new_game_blob));
         blob.total_clicks = self.total_clicks();
