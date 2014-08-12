@@ -86,6 +86,9 @@ Building = Ice.$extend('Building', {
         var self = this;
 
         var classes = "";
+        if(self.qty() || self.unlocked()) {
+            classes += ' has';
+        }
         if(self.can_upgrade()) {
             classes += ' upgrade_ready';
         }

@@ -5,9 +5,9 @@
     <div class="earns">
         <!-- ko foreach: {data: _.keys(bld.per_click()), as: 'currency' } -->
             <div>
-                <span data-bind="text: currency == 'money' ? '$' + format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency))
+                <span data-bind="html: currency == 'money' ? '$' + format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency))
                         : currency == 'bugs' ? format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency)) + ' bugs'
-                        : format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency)) + game.indexed_buildings()[currency].name()">
+                        : format_number(bld.per_click()[currency] * bld.get_multiplier('click', currency)) + ' ' + game.indexed_buildings()[currency].name()">
                 </span> per click
             </div>
 
@@ -15,9 +15,9 @@
 
         <!-- ko foreach: {data: _.keys(bld.per_tick()), as: 'currency' } -->
             <div>
-                <span data-bind="text: currency == 'money' ? '$' + format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency))
+                <span data-bind="html: currency == 'money' ? '$' + format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency))
                         : currency == 'bugs' ? format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency)) + ' bugs'
-                        : format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency)) + game.indexed_buildings()[currency].name()">
+                        : format_number(bld.per_tick()[currency] * bld.get_multiplier('tick', currency)) + ' ' + game.indexed_buildings()[currency].name()">
                 </span> per tick
             </div>
 
@@ -39,7 +39,7 @@
         <span class="upgrade" data-bind="text: bld.upgrade_bonus().toFixed(2)"></span>x power
         <!-- ko if: bld.can_upgrade() -->
 
-            (<a class="upgrade_link" href="javascript: void" data-bind="click: function(bld, eargs) {
+            <a class="upgrade_link" href="javascript: void" data-bind="click: function(bld, eargs) {
                                     eargs.preventDefault();
                                     bld.upgrade();
                                 }
@@ -52,8 +52,8 @@
                         return 'icon-bug';
                     }
                 }(bld)
-            "></i><span data-bind="text: format_number(bld.upgrade_cost())">
-                </span></a>)
+            "></i><span data-bind="html: format_number(bld.upgrade_cost())">
+                </span></a>
         <!-- /ko -->
         <!-- ko if: ! bld.can_upgrade() -->
             <span class="upgrade_link"><i data-bind="
@@ -65,20 +65,20 @@
                         return 'icon-bug';
                     }
                 }(bld)
-            "></i><span data-bind="text: format_number(bld.upgrade_cost())">
+            "></i><span data-bind="html: format_number(bld.upgrade_cost())">
             </span></span>
 
         <!-- /ko -->
     </div>
     <div class="qty_row">
-        <span class="qty" data-bind="text: format_number(bld.qty())"></span>
+        <span class="qty" data-bind="html: format_number(bld.qty())"></span>
         <!-- ko if: bld.can_integrate() -->
             <a href="javascript:void" class="integrate_link" data-bind="click: function(bld, eargs) {
                                         eargs.preventDefault();
                                         game.integrate(bld);
                                     }
             ">
-                +</span><span class="integrates_to" data-bind="text: format_number(bld.integrates_to())"></span>
+                +</span><span class="integrates_to" data-bind="html: format_number(bld.integrates_to())"></span>
             </a>
         <!-- /ko -->
 

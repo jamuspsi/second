@@ -69,7 +69,7 @@ function format_number(num) {
     if(smaller >= 100) fmted = smaller.toFixed(0);
     else if(smaller >= 10) fmted = smaller.toFixed(1);
     else fmted = smaller.toFixed(2);
-    return fmted + suffix;
+    return fmted + "<span class='suffix'>"+suffix+"</span>";
 
 
 }

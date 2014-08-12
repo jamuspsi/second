@@ -1,36 +1,39 @@
 <div><h1>Second Derivative Clicker</h1></div>
 <div class="balances">
+
+
     <table>
-        <tr>
-            <th>Money</th>
-            <td data-bind="text: '$' + format_number(game.money())"></td>
-            <th>Per Click:</th>
+        <tr class="currency">
+            <th>Money:</th>
+            <td><i class="icon-dollar"></i><span data-bind="html: format_number(game.money())"></span></td>
+            <th>Bugs:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="text: format_number(game.indexed_buildings()['IT.1'].qty() * indexed_buildings()['IT.1'].get_multiplier('click', 'money') )"></span>
+                <i class="icon-bug"></i><span data-bind="html: format_number(game.bugs())"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>Per Tick:</th>
+            <td>
+                <i class="icon-dollar"></i><span data-bind="html: format_number(game.indexed_buildings()['DB.1'].qty() * 10 * game.indexed_buildings()['DB.1'].get_multiplier('tick', 'money'))"></span>
             </td>
             <th>Per Tick:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="text: format_number(game.indexed_buildings()['DB.1'].qty() * 10 * game.indexed_buildings()['DB.1'].get_multiplier('tick', 'money'))"></span>
+                <i class="icon-bug"></i><span data-bind="html: format_number(game.indexed_buildings()['User.1'].qty() * 10 * game.indexed_buildings()['User.1'].get_multiplier('tick', 'money'))"></span>
             </td>
         </tr>
         <tr>
+            <th>Per Click:</th>
+            <td>
+                <i class="icon-dollar"></i><span data-bind="html: format_number(game.indexed_buildings()['IT.1'].qty() * indexed_buildings()['IT.1'].get_multiplier('click', 'money') )"></span>
+            </td>
 
 
-        </tr>
-        <tr>
-            <th>Bugs</th>
-            <td>
-                <i class="icon-bug"></i><span data-bind="text: format_number(game.bugs())"></span>
-            </td>
-            <th>Per Tick</th>
-            <td>
-                <i class="icon-bug"></i><span data-bind="text: format_number(game.indexed_buildings()['User.1'].qty() * 10 * game.indexed_buildings()['User.1'].get_multiplier('tick', 'money'))"></span>
-            </td>
         </tr>
     </table>
+</div>
 
 <div class="button_holder">
-    <button data-bind="
+    <button class="money_button" data-bind="
         click: function(data, eargs) {
             eargs.preventDefault();
             game.button_click();
@@ -52,6 +55,7 @@
                 as: 'kind'
             } -->
             <th class="kind_label" data-bind="text: kind"></th>
+            <th></th>
             <!-- /ko -->
             </tr>
         </thead>
@@ -80,8 +84,14 @@
                     <span>I really can't see this ever happening, but the original idea for this game was to auto-generate higher tiers, and I might someday go back to that.</span></td>
 
                 <!-- /ko -->
+                <td class="horiz_spacer">&nbsp;</td>
             <!-- /ko -->
 
+        </tr>
+        <tr>
+            <td class="vert_spacer" data-bind="attr: {
+                colspan: game.kinds().length * 2
+            }"></td>
         </tr>
         <!-- /ko -->
     </tbody>
