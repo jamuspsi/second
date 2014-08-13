@@ -54,12 +54,18 @@ body {
                 background-color: #222;
 
             }
-            a.upgrade_link, a.integrate_link {
-                color: limegreen;
-            }
             &.upgrade_ready {
                 background-color: #002200;
             }
+        }
+        a.upgrade_link, a.integrate_link {
+                color: limegreen;
+        }
+    }
+
+    .help {
+        a.integrate_link, a.upgrade_link {
+            background-color: #002200;
         }
     }
 }
@@ -91,7 +97,16 @@ body {
     width: 5px;
 }
 .vert_spacer {
-
+    i.left {
+        padding-left: 18px;
+        float: left;
+    }
+    i.right {
+        padding-right: 18px;
+        float: right;
+    }
+    text-align: center;
+    font-size: 12px;
 }
 
 .building {
@@ -119,11 +134,14 @@ body {
         font-size: 10pt;
     }
 
-    a.upgrade_link, a.integrate_link {
-        text-decoration: none;
-    }
-
 }
+
+
+a.upgrade_link, a.integrate_link {
+    text-decoration: none;
+}
+
+
 
 .money_button {
     padding: 10px;
@@ -152,6 +170,7 @@ body {
     strike {
         color: red;
     }
+
 }
 
 .wipe_save {

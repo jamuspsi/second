@@ -93,9 +93,22 @@
 
         </tr>
         <tr>
-            <td class="vert_spacer" data-bind="attr: {
-                colspan: game.kinds().length * 2
-            }"></td>
+            <!-- ko foreach: {
+                    data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
+                    as: 'bld'
+                }-->
+                <!-- ko if: bld && bld.tier() !== 8 -->
+                <td class="vert_spacer conversion_note">
+                    <!-- ko if: !game.hide_conversions() -->
+                    <i class="left icon-arrow-down" style="float: left"></i>
+                    Integrates at
+                    <span data-bind="html: format_number(bld.ifactor())"></span> : 1
+                    <i class="right icon-arrow-down"></i>
+                    <!-- /ko -->
+                </td>
+                <td></td>
+                <!-- /ko -->
+            <!-- /ko -->
         </tr>
         <!-- /ko -->
     </tbody>
@@ -106,16 +119,27 @@
     <p>
         This is a loving <strike>tribute</strike> <strike>derivative</strike> second derivative of the definitive incremental <a href="http://gzgreg.github.io/DerivativeClicker/"  target="_blank">Derivative Clicker</a>.  It's also my first published game.
     </p>
+    <h3>Things you should know:</h3>
     <ul>
-        <li>The big theme here is that you must <strong>Integrate</strong> your staff into higher levels, consuming all lower levels to form fewer, higher tiered staff.</li>
-        <li>The conversion rate scales fairly dramatically.</li>
-        <li>Ticks are statically timed because warping time in the late game is needlessly complicated.  Instead, the QA line adds a bonus to the row.</li>
-        <li>Each <strong>cell</strong> can be upgraded for a cost, stacking multiplicatively with the QA bonus.</li>
-        <li>The Programmer line will automate your clicking for you.  He would also like you to know that the F12 button is broken.</li>
-        <li>The game autosaves one second after each upgrade/integration, and every minute besides.</li>
+        <li><strong>Integrate</strong> weaker items to stronger ones by clicking the number next to a plus, like
+            <a href="javascript: void" class="integrate_link">+3</a>
+        </li>
+        <li>
+            <strong>You cannot integrate a lower tier than you have the materials for!</strong>
+            Timing can help, here, but isn't necessary.
+        </li>
+        <li>
+            When integrating, <strong>all tiers above the target tier are converted</strong> at their respective rates.
+        </li>
+        <li>
+            Upgrade each cell by clicking the green text near the <strong>Power</strong> listing, like
+            <a href="javascript: void" class="upgrade_link"><i class="icon-dollar"></i>1.00<span class="suffix">M</span></a>
+        </li>
         <li>Prestige will increase upgrade effectiveness, based on the highest tier you have reached in each line.</li>
-        <li>I'm CRAZY nervous about releasing this.  Please please please please tell me how much you hate it on the reddit thread.</li>
+        <li>The game autosaves one second after each upgrade/integration, and every minute besides.</li>
+
     </ul>
+    <p>Please leave feedback on the <a href="http://www.reddit.com/r/incremental_games/comments/2dcpxo/game_second_derivative_clicker/" target="_blank">Reddit thread</a>, I try to read every one and REALLY appreciate feedback!</p>
 
 </div>
 
@@ -153,6 +177,9 @@
                 game.new_game_plus();
             },
         ">Prestige</button>
+    </div>
+    <div>
+        <label><input type="checkbox" data-bind="checked: game.hide_conversions" /> Hide Conversions</label>
     </div>
     <div>
         <!-- ko if: game.can_prestige() -->

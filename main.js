@@ -130,6 +130,7 @@ Second = Ice.$extend('Second', {
         self.total_clicks = ko.observable(0);
         self.total_ticks = ko.observable(0);
 
+        self.hide_conversions = ko.observable(false);
 
         self.load_game(blob);
         self.tick_interval = window.setInterval(_.bind(self.tick, self), 500);
@@ -288,6 +289,7 @@ Second = Ice.$extend('Second', {
             upgrade_effectiveness: self.upgrade_effectiveness(),
             total_ticks: self.total_ticks(),
             total_clicks: self.total_clicks(),
+            hide_conversions: self.hide_conversions(),
 
             buildings: {}
         };
@@ -313,7 +315,10 @@ Second = Ice.$extend('Second', {
         self.buildings(new_buildings);
         self.refresh_building_links();
 
-        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks'], function(attr) {
+        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions'], function(attr) {
+            if(blob[attr] === undefined) {
+                blob[attr] = Second.new_game_blob[attr];
+            }
             self[attr](blob[attr]);
         });
 
@@ -337,7 +342,13 @@ Second = Ice.$extend('Second', {
     },
     new_game_plus: function() {
         var self = this;
-        if(!self.can_prestige()) return;
+        if(!self.can_prestige()) {
+            window.alert("You can't prestige until you've unlocked something in the 4th tier.");
+            return;
+        }
+        if(!window.confirm("Prestiging now will cause you to lose ALL your current items and upgrades, but will permanently add " + self.prestige_preview().toFixed(2) +"x to every upgrade you buy.\n\nPress OK to prestige and gain the bonus, Cancel to keep playing for now.")) {
+            return;
+        }
 
         icea.report_prestige(self.prestige_preview());
 
@@ -369,6 +380,8 @@ Second.new_game_blob = {
     upgrade_effectiveness: 1,
     total_ticks: 0,
     total_clicks: 0,
+
+    hide_conversions: false,
     buildings: {
         'IT.1': {
             unlocked: true
