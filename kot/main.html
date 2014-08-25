@@ -97,7 +97,7 @@
                     data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
                     as: 'bld'
                 }-->
-                <!-- ko if: bld && bld.tier() !== 8 -->
+                <!-- ko if: bld && bld.tier() !== 9 -->
                 <td class="vert_spacer conversion_note">
                     <!-- ko if: !game.hide_conversions() -->
                     <i class="left icon-arrow-down" style="float: left"></i>
