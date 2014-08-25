@@ -105,7 +105,7 @@ Building = Ice.$extend('Building', {
     }),
     upgrade: function() {
         var self = this;
-        var upgrade_cost_factor = 10;
+        var upgrade_cost_factor = 1000;
         var cash_obs = game[self.upgrade_currency()];
         if(cash_obs() < self.upgrade_cost()) {
             return;
