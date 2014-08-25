@@ -171,6 +171,9 @@ Building = Ice.$extend('Building', {
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
+        if(self.kind() == 'IT') {
+            return Math.pow(100, self.tier()+1);
+        }
         return Math.pow(100, self.tier());
 
     }),
@@ -244,7 +247,7 @@ BUILDINGS = [
 ];
 
 _.each(['IT', 'QA', 'Programmer', 'DB', 'User'], function(kind) {
-    for(var x=2;x<=8;x++) {
+    for(var x=2;x<=9;x++) {
         var bld = {
             kind: kind,
             tier: x,
@@ -271,15 +274,17 @@ BUILDING_NAMES = {
     'IT.6': 'Server Admin',
     'IT.7': 'Cloud Architect',
     'IT.8': 'Tim Berners-Lee',
+    'IT.9': 'Linus Torvalds',
 
     'QA.1': 'Red Pens',
     'QA.2': 'Print Preview',
     'QA.3': 'Frequent Backups',
     'QA.4': 'Peer Review',
-    'QA.5': 'CVS',
-    'QA.6': 'SVN',
-    'QA.7': 'Hg',
-    'QA.8': 'Git',
+    'QA.5': 'Requirements',
+    'QA.6': 'CVS',
+    'QA.7': 'SVN',
+    'QA.8': 'Hg',
+    'QA.9': 'Git',
 
     'Programmer.1': 'Will Wright',
     'Programmer.2': 'Richard Bartle',
@@ -288,25 +293,29 @@ BUILDING_NAMES = {
     'Programmer.5': 'Guido Van Rossum',
     'Programmer.6': 'Grace Hopper',
     'Programmer.7': 'Ada Lovelace',
-    'Programmer.8': 'Alan Turing',
+    'Programmer.8': 'Nasir Gebelli',
+    'Programmer.9': 'Alan Turing',
 
     'DB.1': 'Trapper Keeper',
     'DB.2': 'BDB',
     'DB.3': 'SQLite',
-    'DB.4': 'Oracle',
+    'DB.4': 'MongoDB',
     'DB.5': 'NoSQL',
     'DB.6': 'MySQL',
     'DB.7': 'Postgres',
-    'DB.8': 'TSQL',
+    'DB.8': 'Oracle',
+    'DB.9': 'TSQL',
 
     'User.1': 'YouTube User',
     'User.2': 'Trained Monkey',
     'User.3': 'Forum Troll',
     'User.4': '"Enthusiast"',
     'User.5': 'John Q. Public',
-    'User.6': 'OEM',
-    'User.7': 'Casual Debugger',
-    'User.8': 'Chaos Monkey'
+    'User.6': 'Beta Tester',
+    'User.7': 'OEM',
+    'User.8': 'Casual Debugger',
+    'User.9': 'Chaos Monkey',
+
 
 
 };
