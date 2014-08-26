@@ -314,7 +314,7 @@ BUILDING_NAMES = {
     'User.6': 'Beta Tester',
     'User.7': 'OEM',
     'User.8': 'Casual Debugger',
-    'User.9': 'Chaos Monkey',
+    'User.9': 'Chaos Monkey'
 
 
 
