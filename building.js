@@ -222,27 +222,27 @@ BUILDINGS = [
     {
         kind: 'IT',
         tier: 1,
-        per_click: {'money': 1},
+        per_click: {'money': 1}
     },
     {
         kind: 'QA',
         tier: 1,
-        upgrade_currency: 'bugs',
+        upgrade_currency: 'bugs'
     },
     {
         kind: 'Programmer',
         tier: 1,
-        upgrade_currency: 'bugs',
+        upgrade_currency: 'bugs'
     },
     {
         kind: 'DB',
         tier:1,
-        per_tick: {'money': 10},
+        per_tick: {'money': 10}
     },
     {
         kind: 'User',
         tier: 1,
-        per_tick: {'bugs': 1},
+        per_tick: {'bugs': 1}
     }
 ];
 

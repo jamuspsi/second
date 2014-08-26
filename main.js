@@ -369,7 +369,7 @@ Second = Ice.$extend('Second', {
             return;
         }
         self.load_game(Second.new_game_blob);
-    },
+    }
 
 });
 
