@@ -22,7 +22,7 @@ $(function(){
     MonkeypatchKoTemplateBinding();
 
     loadExternalKnockoutTemplates('/kot/', function() {
-
+        console.log("returned from lekt");
 
         sound_manifest = [
         ];
@@ -35,6 +35,8 @@ $(function(){
         icea = Analytics();
 
         lazy_game = ko.observable(null);
+        //alert('Second is:');
+        //alert(Second);
         game = Second.start_game();
         lazy_game(game);
 
@@ -44,7 +46,6 @@ $(function(){
 
 
     });
-
 
 });
 
