@@ -186,6 +186,16 @@ Second = Ice.$extend('Second', {
             self.button_click(autoclicks);
         }
     },
+    money_per_click: function() {
+        var it = self.indexed_buildings()['IT.1'];
+        return format_number(it.qty() * it.get_multiplier('click', 'money') );
+    },
+    money_per_tick: function() {
+        var db = self.indexed_buildings()['DB.1'];
+        var prog = self.indexed_buildings()['Programmer.1'];
+        var it = self.indexed_buildings()['IT.1'];
+        return format_number(it.qty() * it.get_multiplier('click', 'money')  * db.db_click_power() * prog.programmer_autoclicks_per_tick());  
+    },
     integrate: function(target) {
         var self = this;
         _.each(self.buildings_by_tier(), function(bld) {
