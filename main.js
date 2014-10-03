@@ -155,8 +155,8 @@ Second = Ice.$extend('Second', {
     button_click: function(num) {
         var self = this;
         if(!num) {
-            var prog = self.indexed_buildings()['Programmer.1'];
-            num = prog.programmer_click_power();
+            var prog = self.indexed_buildings()['DB.1'];
+            num = prog.db_click_power();
         }
         self.total_clicks(self.total_clicks() + num);
         click_each = function(bld) { bld.click(num); };
@@ -178,9 +178,10 @@ Second = Ice.$extend('Second', {
         var self = this;
 
         var prog = self.indexed_buildings()['Programmer.1'];
+        var db = self.indexed_buildings()['DB.1'];
         //This got exponential REAL fast.
         //var autoclicks = prog.programmer_autoclicks_per_tick() * prog.programmer_click_power();
-        var autoclicks = prog.programmer_autoclicks_per_tick();
+        var autoclicks = prog.programmer_autoclicks_per_tick() * db.db_click_power();
         if(autoclicks) {
             self.button_click(autoclicks);
         }
