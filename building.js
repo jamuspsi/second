@@ -236,8 +236,8 @@ BUILDINGS = [
     },
     {
         kind: 'DB',
-        tier:1,
-        per_tick: {'money': 100}
+        tier:1
+        //per_tick: {'money': 100}
     },
     {
         kind: 'User',
