@@ -167,7 +167,7 @@ Building = Ice.$extend('Building', {
     programmer_autoclicks_per_tick: function() {
         var self = this;
         if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty() * self.get_multiplier() * self.programmer_click_power()) / log10);
+        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10) * self.programmer_click_power();
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
@@ -222,7 +222,7 @@ BUILDINGS = [
     {
         kind: 'IT',
         tier: 1,
-        per_click: {'money': 1}
+        per_click: {'money': 0.01}
     },
     {
         kind: 'QA',
@@ -237,7 +237,7 @@ BUILDINGS = [
     {
         kind: 'DB',
         tier:1,
-        per_tick: {'money': 10}
+        per_tick: {'money': 100}
     },
     {
         kind: 'User',
@@ -289,7 +289,7 @@ BUILDING_NAMES = {
     'Programmer.1': 'Will Wright',
     'Programmer.2': 'Richard Bartle',
     'Programmer.3': 'Peter Molyneux',
-    'Programmer.4': 'Bjarne Strossup',
+    'Programmer.4': 'Bjarne Stroustrup',
     'Programmer.5': 'Guido Van Rossum',
     'Programmer.6': 'Grace Hopper',
     'Programmer.7': 'Ada Lovelace',
