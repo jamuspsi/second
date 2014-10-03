@@ -18,7 +18,7 @@
         <tr>
             <th>Per Tick:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="html: format_number(game.indexed_buildings()['DB.1'].qty() * 10 * game.indexed_buildings()['DB.1'].get_multiplier('tick', 'money'))"></span>
+                <i class="icon-dollar"></i><span data-bind="html: game.money_per_tick()"></span>
             </td>
             <th>Per Tick:</th>
             <td>
@@ -28,7 +28,7 @@
         <tr>
             <th>Per Click:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="html: format_number(game.indexed_buildings()['IT.1'].qty() * indexed_buildings()['IT.1'].get_multiplier('click', 'money') )"></span>
+                <i class="icon-dollar"></i><span data-bind="html: game.money_per_click()"></span>
             </td>
 
 
