@@ -187,10 +187,12 @@ Second = Ice.$extend('Second', {
         }
     },
     money_per_click: function() {
+        var self = this;
         var it = self.indexed_buildings()['IT.1'];
         return format_number(it.qty() * it.get_multiplier('click', 'money') );
     },
     money_per_tick: function() {
+        var self = this;
         var db = self.indexed_buildings()['DB.1'];
         var prog = self.indexed_buildings()['Programmer.1'];
         var it = self.indexed_buildings()['IT.1'];
