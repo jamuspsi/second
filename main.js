@@ -270,7 +270,7 @@ Second = Ice.$extend('Second', {
         });
 
         return _.sum(tiers_reached, function(tier) {
-            return Math.pow(tier-3, 2) * 0.03;
+            return Math.pow(tier-2, 2) * 0.05;
         });
     }),
 
