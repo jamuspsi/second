@@ -159,7 +159,7 @@ Building = Ice.$extend('Building', {
         }
         return 1 + Math.log(self.qty() * self.upgrade_bonus()) / log10;
     },
-    programmer_click_power: function() {
+    db_click_power: function() {
         var self = this;
         if(!self.qty()) { return 1; }
         return Math.max(1, Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10));
@@ -167,7 +167,7 @@ Building = Ice.$extend('Building', {
     programmer_autoclicks_per_tick: function() {
         var self = this;
         if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10) * self.programmer_click_power();
+        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10);
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
