@@ -159,11 +159,11 @@ Second = Ice.$extend('Second', {
             num = prog.programmer_click_power();
         }
         self.total_clicks(self.total_clicks() + num);
-        click_each = function(bld) { bld.click(); };
+        click_each = function(bld) { bld.click(num); };
 
-        for(var x=0;x<num;x++) {
+        //for(var x=0;x<num;x++) {
             _.each(self.buildings_by_tier(), click_each);
-        }
+        //}
     },
     tick: function() {
         var self = this;
