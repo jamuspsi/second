@@ -129,10 +129,10 @@ Building = Ice.$extend('Building', {
         });
 
     },
-    click: function() {
+    click: function(num) {
         var self = this;
         _.each(self.per_click(), function(amt, currency) {
-            var mult = self.get_multiplier('tick', currency);
+            var mult = self.get_multiplier('tick', currency) * num;
             if(currency === 'money' || currency === 'bugs') {
                 game[currency](game[currency]() + mult * amt * self.qty());
             } else {
@@ -162,12 +162,12 @@ Building = Ice.$extend('Building', {
     programmer_click_power: function() {
         var self = this;
         if(!self.qty()) { return 1; }
-        return Math.max(1, Math.floor(Math.log(self.qty()) / log100));
+        return Math.max(1, Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10));
     },
     programmer_autoclicks_per_tick: function() {
         var self = this;
         if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty()) / log100);
+        return Math.floor(Math.log(self.qty() * self.get_multiplier() * self.programmer_click_power()) / log10);
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
