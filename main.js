@@ -413,19 +413,24 @@ Second.new_game_blob = {
         },
 
         'IT.2': {
-            qty: 1
+            qty: 1,
+            unlocked: true
         },
         'QA.2': {
-            qty:1
+            qty:1,
+            unlocked: true
         },
         'Programmer.2': {
-            qty: 1
+            qty: 1,
+            unlocked: true
         },
         'DB.2': {
-            qty: 1
+            qty: 1,
+            unlocked: true
         },
         'User.2': {
-            qty: 1
+            qty: 1,
+            unlocked: true
         }
     }
 };
