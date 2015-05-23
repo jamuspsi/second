@@ -60,6 +60,12 @@ NUMBER_SUFFIXES = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "Nn",
                    "Sg"
 ];
 function format_number(num) {
+    if(num === 0) {
+        return 0;
+    }
+    if(num < 10 && num % 1) {
+        return num.toFixed(2);
+    }
     if(num < 1000) {
         return Math.floor(num);
     }
@@ -154,6 +160,14 @@ Second = Ice.$extend('Second', {
             return 1 * bld.tier();
         });
     }),
+    buy_all_upgrades: function() {
+        var self = this;
+        _.each(self.buildings_by_tier(), function(bld) {
+            if(bld.can_upgrade()) {
+                bld.upgrade();
+            }
+        });
+    },
     button_click: function(num) {
         var self = this;
         if(!num) {
