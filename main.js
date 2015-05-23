@@ -483,7 +483,10 @@ Second.start_game = function() {
     }
     if(!blob.save_version || blob.save_version < Second.save_version) {
         // blob = Second.new_game_blob;
-        window.alert("The game has changed dramatically since you last played!  Your save will still work, but it might be more fun to wipe your save and start over with the new rules.  You can find the WIPE SAVE button at the very bottom.")
+
+        if(window.confirm("The game has changed dramatically since you last played!  Your save will still work, but it might be more fun to wipe your save and start over with the new rules.  Click OK to wipe your save now, or Cancel to continue with your old save.")) {
+            blob = Second.new_game_blob;
+        }
     }
     return new Second(blob);
 
