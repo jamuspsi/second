@@ -172,7 +172,7 @@ Second = Ice.$extend('Second', {
         var ticks = self.indexed_buildings()['Programmer.1'].programmer_ticks_per_second();
         self.total_ticks(self.total_ticks() + ticks);
         self.time_ticks(self.time_ticks() + ticks);
-        console.log("Ticking ", ticks);
+        // console.log("Ticking ", ticks);
         // self.total_ticks(self.total_ticks() + 1);
         _.each(self.buildings_by_tier(), function(bld) {
             bld.tick(ticks);
