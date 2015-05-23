@@ -123,6 +123,7 @@
     </p>
     <h3>Things you should know:</h3>
     <ul>
+        <li><strong>Ticks/second</strong> affects all cells.  <strong>Ticks/click</strong> affects only the cell you're clicking.</li>
         <li><strong>Integrate</strong> weaker items to stronger ones by clicking the number next to a plus, like
             <a href="javascript: void" class="integrate_link">+3</a>
         </li>
@@ -133,6 +134,8 @@
         <li>
             When integrating, <strong>all tiers above the target tier are converted</strong> at their respective rates.
         </li>
+        <li>Use your clicks to focus development on what you think will help most, and to recover lower tiers after integration.</li>
+        <li>You can click anywhere on a cell, not just the title.</li>
         <li>
             Upgrade each cell by clicking the green text near the <strong>Power</strong> listing, like
             <a href="javascript: void" class="upgrade_link"><i class="icon-dollar"></i>1.00<span class="suffix">M</span></a>
@@ -148,14 +151,18 @@
 <div class="stats">
     <table>
         <tr>
-            <th>Total Clicks:</th>
             <th>Total Ticks:</th>
+            <th>Time Ticks:</th>
+            <th>Total Clicks:</th>
+            <th>Manual Ticks</th>
             <th>Upgrade Efficiency:</th>
 
         <tr>
         </tr>
-            <td data-bind="text: game.total_clicks()"></td>
             <td data-bind="text: game.total_ticks()"></td>
+            <td data-bind="text: game.time_ticks()"></td>
+            <td data-bind="text: game.total_clicks()"></td>
+            <td data-bind="text: game.manual_ticks()"></td>
             <td>
                 <span data-bind="text: game.upgrade_effectiveness().toFixed(2)"></span>x
             </td>

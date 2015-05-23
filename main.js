@@ -129,6 +129,8 @@ Second = Ice.$extend('Second', {
         self.upgrade_effectiveness = ko.observable(1);
         self.total_clicks = ko.observable(0);
         self.total_ticks = ko.observable(0);
+        self.manual_ticks = ko.observable(0);
+        self.time_ticks = ko.observable(0);
 
         self.hide_conversions = ko.observable(false);
 
@@ -168,8 +170,10 @@ Second = Ice.$extend('Second', {
     tick: function() {
         var self = this;
         var ticks = self.indexed_buildings()['Programmer.1'].programmer_ticks_per_second();
+        self.total_ticks(self.total_ticks() + ticks);
+        self.time_ticks(self.time_ticks() + ticks);
         console.log("Ticking ", ticks);
-        self.total_ticks(self.total_ticks() + 1);
+        // self.total_ticks(self.total_ticks() + 1);
         _.each(self.buildings_by_tier(), function(bld) {
             bld.tick(ticks);
         });
@@ -324,6 +328,8 @@ Second = Ice.$extend('Second', {
             upgrade_effectiveness: self.upgrade_effectiveness(),
             total_ticks: self.total_ticks(),
             total_clicks: self.total_clicks(),
+            time_ticks: self.time_ticks(),
+            manual_ticks: self.manual_ticks(),
             hide_conversions: self.hide_conversions(),
 
             buildings: {}
@@ -350,10 +356,11 @@ Second = Ice.$extend('Second', {
         self.buildings(new_buildings);
         self.refresh_building_links();
 
-        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions'], function(attr) {
+        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions', 'manual_ticks', 'time_ticks'], function(attr) {
             if(blob[attr] === undefined) {
                 blob[attr] = Second.new_game_blob[attr];
             }
+            console.log("Loading ", attr);
             self[attr](blob[attr]);
         });
 
@@ -390,6 +397,9 @@ Second = Ice.$extend('Second', {
         var blob = JSON.parse(JSON.stringify(Second.new_game_blob));
         blob.total_clicks = self.total_clicks();
         blob.total_ticks = self.total_ticks();
+        blob.time_ticks = self.time_ticks();
+        blob.manual_ticks = self.manual_ticks();
+
         blob.upgrade_effectiveness = self.upgrade_effectiveness() + self.prestige_preview();
 
         this.load_game(blob);
@@ -415,6 +425,8 @@ Second.new_game_blob = {
     upgrade_effectiveness: 1,
     total_ticks: 0,
     total_clicks: 0,
+    time_ticks: 0,
+    manual_ticks: 0,
 
     hide_conversions: false,
     buildings: {

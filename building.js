@@ -118,10 +118,14 @@ Building = Ice.$extend('Building', {
     },
     manual_tick: function() {
         var self = this;
+        game.total_clicks(game.total_clicks() + 1);
 
         var db = game.indexed_buildings()['DB.1'].db_click_power();
+
+        game.manual_ticks(game.manual_ticks() + db);
+        game.total_ticks(game.total_ticks() + db);
         self.tick(db);
-        self.click(db);
+        //self.click(db);
 
     },
     tick: function(ticks) {
