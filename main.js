@@ -322,6 +322,7 @@ Second = Ice.$extend('Second', {
         var self = this;
 
         var blob = {
+            save_version: Second.save_version,
             building_qtys: {},
             money: self.money(),
             bugs: self.bugs(),
@@ -407,7 +408,7 @@ Second = Ice.$extend('Second', {
     },
     wipe_save: function() {
         var self = this;
-        if(!window.confirm("Are you sure?  This IS NOT PRESTIGE.  You're going to lose everything.  Press OK to Prestige, Cancel to stop.")) {
+        if(!window.confirm("Are you sure?  This IS NOT PRESTIGE.  You're going to lose everything.  Press OK to wipe everything, Cancel to stop.")) {
             return;
         }
         if(!window.confirm("I can't help it.  Are you REALLY SURE you want to LOSE ALL PROGRESS and START OVER?  Press OK to start from scratch, Cancel to keep going.")) {
@@ -419,7 +420,10 @@ Second = Ice.$extend('Second', {
 });
 
 
+Second.save_version = 2;
+
 Second.new_game_blob = {
+    save_version: Second.save_version,
     money: 0,
     bugs: 0,
     upgrade_effectiveness: 1,
@@ -476,6 +480,10 @@ Second.start_game = function() {
         blob = JSON.parse(json);
     } else {
         blob = Second.new_game_blob;
+    }
+    if(!blob.save_version || blob.save_version < Second.save_version) {
+        // blob = Second.new_game_blob;
+        window.alert("The game has changed dramatically since you last played!  Your save will still work, but it might be more fun to wipe your save and start over with the new rules.  You can find the WIPE SAVE button at the very bottom.")
     }
     return new Second(blob);
 
