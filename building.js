@@ -116,15 +116,24 @@ Building = Ice.$extend('Building', {
 
         game.throttled_save();
     },
-    tick: function() {
+    manual_tick: function() {
+        var self = this;
+
+        var db = game.indexed_buildings()['DB.1'].db_click_power();
+        self.tick(db);
+        self.click(db);
+
+    },
+    tick: function(ticks) {
+        if(!ticks || isNaN(Number(ticks))) ticks = 1;
         var self = this;
         _.each(self.per_tick(), function(amt, currency) {
             var mult = self.get_multiplier('tick', currency);
             if(currency === 'money' || currency === 'bugs') {
-                game[currency](game[currency]() + mult * amt * self.qty());
+                game[currency](game[currency]() + mult * amt * ticks * self.qty());
             } else {
                 var bld = game.indexed_buildings()[currency];
-                bld.qty(bld.qty() + mult * amt * self.qty());
+                bld.qty(bld.qty() + mult * amt * ticks * self.qty());
             }
         });
 
@@ -157,20 +166,29 @@ Building = Ice.$extend('Building', {
         if(self.qty() === 0) {
             return 1;
         }
-        return 1 + Math.log(self.qty() * self.upgrade_bonus()) / log10;
+        return 1 + Math.log(self.qty() * self.upgrade_bonus()) / Math.log(5);
     },
     db_click_power: function() {
         var self = this;
         if(!self.qty()) { return 1; }
-        return Math.max(1, Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10));
+        var base = self.qty() * self.get_multiplier();
+        return Math.max(1, Math.floor(Math.log(base) / Math.log(5)));
     },
     programmer_autoclicks_per_tick: function() {
         var self = this;
         if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / log10);
+        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / Math.log(5));
+    },
+    programmer_ticks_per_second: function() {
+        var self = this;
+        if(!self.qty()) { return 1; }
+        var base = self.qty() * self.get_multiplier();
+        return Math.max(1, Math.floor(Math.log(base) / Math.log(10)));
     },
     ifactor: Ice.kocomputed(function() {
         var self = this;
+        return Math.pow(1000, self.tier());
+
         if(self.kind() == 'IT') {
             return Math.pow(100, self.tier()+1);
         }
@@ -222,7 +240,7 @@ BUILDINGS = [
     {
         kind: 'IT',
         tier: 1,
-        per_click: {'money': 0.01}
+        per_tick: {'money': 0.01}
     },
     {
         kind: 'QA',
@@ -256,7 +274,7 @@ _.each(['IT', 'QA', 'Programmer', 'DB', 'User'], function(kind) {
             upgrade_currency: kind === 'Programmer' || kind === 'QA' ? 'bugs' : 'money'
         };
         var prevkey = kind + '.' + (x-1);
-        if(kind === 'IT') {
+        if(kind === 'NOTIT') {
             bld.per_click[prevkey] = 1;
         } else {
             bld.per_tick[prevkey] = 1;

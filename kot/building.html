@@ -1,6 +1,9 @@
-<!--<div class="building">-->
+
+
     <div class="title_row">
-        <span class="title" data-bind="text: bld.name()"></span>
+        <span class="title" data-bind="
+            text: bld.name(),
+        "></span>
     </div>
     <div class="earns">
         <!-- ko foreach: {data: _.keys(bld.per_click()), as: 'currency' } -->
@@ -28,12 +31,12 @@
         <!-- /ko -->
         <!-- ko if: bld.key() === 'Programmer.1' -->
             <div>
-                <span data-bind="text: bld.programmer_autoclicks_per_tick()"></span> autoclicks/sec
+                <span data-bind="text: bld.programmer_ticks_per_second()"></span> ticks/sec
             </div>
         <!-- /ko -->
         <!-- ko if: bld.key() === 'DB.1' -->
             <div>
-                <span data-bind="text: bld.db_click_power()"></span> click power
+                <span data-bind="text: bld.db_click_power()"></span>x ticks/click
             </div>
         <!-- /ko -->
     </div>
@@ -86,4 +89,3 @@
 
     </div>
 
-<!--</div>-->

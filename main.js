@@ -167,21 +167,25 @@ Second = Ice.$extend('Second', {
     },
     tick: function() {
         var self = this;
+        var ticks = self.indexed_buildings()['Programmer.1'].programmer_ticks_per_second();
+        console.log("Ticking ", ticks);
         self.total_ticks(self.total_ticks() + 1);
         _.each(self.buildings_by_tier(), function(bld) {
-            bld.tick();
+            bld.tick(ticks);
         });
 
 
     },
     autoclick: function() {
         var self = this;
+        return;  //no such thing anymore.
 
         var prog = self.indexed_buildings()['Programmer.1'];
         var db = self.indexed_buildings()['DB.1'];
         //This got exponential REAL fast.
         //var autoclicks = prog.programmer_autoclicks_per_tick() * prog.programmer_click_power();
-        var autoclicks = prog.programmer_autoclicks_per_tick() * db.db_click_power();
+        // var autoclicks = prog.programmer_autoclicks_per_tick() * db.db_click_power();
+        var autoclicks = prog.programmer_autoclicks_per_tick();
         if(autoclicks) {
             self.button_click(autoclicks);
         }
@@ -191,12 +195,30 @@ Second = Ice.$extend('Second', {
         var it = self.indexed_buildings()['IT.1'];
         return format_number(it.qty() * it.get_multiplier('click', 'money') );
     },
+    ticks_per_second: function() {
+        var self = this;
+        return self.indexed_buildings()['Programmer.1'].programmer_ticks_per_second();
+    },
+    money_per_second: function() {
+        var self = this;
+        return self.ticks_per_second() * self.money_per_tick();
+    },
     money_per_tick: function() {
         var self = this;
-        var db = self.indexed_buildings()['DB.1'];
-        var prog = self.indexed_buildings()['Programmer.1'];
+
         var it = self.indexed_buildings()['IT.1'];
-        return format_number(it.qty() * 0.01 * it.get_multiplier('click', 'money')  * db.db_click_power() * prog.programmer_autoclicks_per_tick());  
+        return it.qty() * 0.01 * it.get_multiplier('click', 'money');
+    },
+    bugs_per_second: function( ){
+        var self = this;
+        return self.ticks_per_second() * self.bugs_per_tick();
+    },
+    bugs_per_tick: function() {
+        var self = this;
+
+        var it = self.indexed_buildings()['User.1'];
+        return it.qty() * 1 * it.get_multiplier('click', 'bugs');
+
     },
     integrate: function(target) {
         var self = this;

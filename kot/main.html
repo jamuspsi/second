@@ -18,17 +18,21 @@
         <tr>
             <th>Per Tick:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="html: game.money_per_tick()"></span>
+                <i class="icon-dollar"></i><span data-bind="html: format_number(game.money_per_tick())"></span>
             </td>
             <th>Per Tick:</th>
             <td>
-                <i class="icon-bug"></i><span data-bind="html: format_number(game.indexed_buildings()['User.1'].qty() * game.indexed_buildings()['User.1'].get_multiplier('tick', 'bugs'))"></span>
+                <i class="icon-bug"></i><span data-bind="html: format_number(game.bugs_per_tick())"></span>
             </td>
         </tr>
         <tr>
-            <th>Per Click:</th>
+            <th>Per Second:</th>
             <td>
-                <i class="icon-dollar"></i><span data-bind="html: game.money_per_click()"></span>
+                <i class="icon-dollar"></i><span data-bind="html: format_number(game.money_per_second())"></span>
+            </td>
+            <th>Per Second:</th>
+            <td>
+                <i class="icon-bug"></i><span data-bind="html: format_number(game.bugs_per_second())"></span>
             </td>
 
 
@@ -36,21 +40,15 @@
     </table>
 </div>
 
-<div class="button_holder">
-    <button class="money_button" data-bind="
-        click: function(data, eargs) {
-            eargs.preventDefault();
-            game.button_click();
-        }
-    ">
-        Click For Money
-    </button>
-</div>
+
 <div>
     (Help, stats, and more buttons at the bottom!)
 </div>
+<div>
+    Click any cell to manually tick it.
+</div>
 
-<div class="building_list">
+<div class="building_list noselect">
     <table>
         <thead>
             <tr>
@@ -69,12 +67,16 @@
                  as: 'tier'
              } -->
         <tr>
+
             <!-- ko foreach: {
                     data: _.map(game.kinds(), function(kind) { return game.indexed_buildings()[kind + '.' + tier] }),
                     as: 'bld'
                 }-->
                 <!-- ko if: bld -->
-                <td class="building" data-bind="css: bld.css()">
+                <td class="building" data-bind="
+                    css: bld.css(),
+                    click:_.bind(bld.manual_tick, bld)
+                ">
                     <!-- ko template: {
                         name: LazyTemplate('kot/', 'building.html'),
                         data: bld,
