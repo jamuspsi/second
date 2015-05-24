@@ -77,13 +77,13 @@
     </div>
     <div class="qty_row">
         <span class="qty" data-bind="html: format_number(bld.qty())"></span>
-        <!-- ko if: bld.can_integrate() -->
+        <!-- ko if: bld.cached_integration_display() -->
             <a href="javascript:void" class="integrate_link" data-bind="click: function(bld, eargs) {
                                         eargs.preventDefault();
                                         game.integrate(bld);
                                     }
             ">
-                +</span><span class="integrates_to" data-bind="html: format_number(bld.integrates_to())"></span>
+                +</span><span class="integrates_to" data-bind="html: format_number(bld.cached_integration_display())"></span>
             </a>
         <!-- /ko -->
 

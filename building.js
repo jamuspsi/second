@@ -16,7 +16,8 @@ Building = Ice.$extend('Building', {
         self.upgrade_cost = ko.observable(opts.upgrade_cost || Math.pow(1000000, self.tier()-1));
         self.upgrade_bonus = ko.observable(1);
 
-        self.integrates_to = ko.observable(0);
+        self.cached_integration_display = ko.observable(null);
+        //self.integrates_to = ko.observable(0);
 
         self.cost_factor = ko.observable(opts.cost_factor || (1 + 0.05 * self.tier()));
         self.proof_cost_factor = ko.observable(opts.proof_cost_factor || 1.1);
@@ -189,8 +190,12 @@ Building = Ice.$extend('Building', {
         var base = self.qty() * self.get_multiplier();
         return Math.max(1, Math.floor(Math.log(base) / Math.log(10)));
     },
+    // How many of this building converts to the next.
     ifactor: Ice.kocomputed(function() {
         var self = this;
+
+        var tier = self.tier();
+
         return Math.pow(1000, self.tier());
 
         if(self.kind() == 'IT') {
@@ -199,29 +204,7 @@ Building = Ice.$extend('Building', {
         return Math.pow(100, self.tier());
 
     }),
-    integrate: function() {
-        var self = this;
-        var ifactor = self.ifactor();
-        var next = self.next;
-
-
-        if(!next) {
-            return; // Or make a new one, later.
-        }
-        var will_integrate = self.integration_count(self.qty());
-        if(will_integrate === 0) return;
-
-        self.qty(0);
-
-        next.qty(next.qty() + will_integrate);
-        if(!next.unlocked()) {
-            next.unlocked(true);
-            icea.report_unlocked_tier(next.kind(), next.tier());
-        }
-
-
-    },
-    integration_count: function(qty) {
+    /*integration_count: function(qty) {
         var self = this;
         var ifactor = self.ifactor();
 
@@ -230,13 +213,86 @@ Building = Ice.$extend('Building', {
         }
 
         return Math.floor(qty / ifactor);
+    },*/
+    // How many of these will result from an integration
+    integrate: function() {
+        var self = this;
+        if(!self.can_integrate()) {
+            return;
+        }
+        var prev = self.prev;
+        self.qty(self.integrates_to());
+        while(prev) {
+            prev.qty(0);
+            prev = prev.prev;
+        }
+        if(!self.unlocked()) {
+            self.unlocked(true);
+            icea.report_unlocked_tier(self.kind(), self.tier());
+        }
+        return;
+        // var ifactor = self.ifactor();
+        // var next = self.next;
+
+        // var will_integrate = self.integration_count(self.qty());
+        // if(will_integrate === 0) return;
+
+        // self.qty(0);
+
+        // next.qty(next.qty() + will_integrate);
+        // if(!next.unlocked()) {
+        //     next.unlocked(true);
+        //     icea.report_unlocked_tier(next.kind(), next.tier());
+        // }
+
+
     },
+    integrates_to: function() {
+        var self = this;
+        if(!self.can_integrate()) return null;
+        var possible = self.total_possible();
+        if(!possible) return null;
+
+        return Math.min(possible, self.ifactor());
+    },
+    // How many of these are possible to make from components.
+    total_possible: function() {
+        var self = this;
+        var qty = self.qty();
+
+        var prev = self.prev;
+        var ifactor = 1;
+        while(prev) {
+            ifactor *= prev.ifactor();
+            qty += prev.qty() / ifactor;
+            prev = prev.prev;
+        }
+        qty = Math.floor(qty);
+        return qty;
+    },
+    // Can make more of THIS building with previous ones.
     can_integrate: function() {
         var self = this;
-        if(!self.next) {
-            return self.integrates_to() > 0;
+        if(self.tier() === 1) {
+            return false;
         }
-        return self.integrates_to() > 0 && self.next.integrates_to() === 0;
+        // if(!self.unlocked()) {
+        //     return false;
+        // }
+        if(self.qty() >= self.ifactor()) return false;
+
+        var prev = self.prev;
+        if(prev.total_possible() >= prev.ifactor()) {
+            return true;
+        }
+
+        return false;
+
+
+        // if(!self.next) {
+        //     return self.integrates_to() > 0;
+        // }
+        // return self.integrates_to() > 0 && self.next.integrates_to() === 0;
     }
 });
 

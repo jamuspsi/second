@@ -240,7 +240,8 @@ Second = Ice.$extend('Second', {
     },
     integrate: function(target) {
         var self = this;
-        _.each(self.buildings_by_tier(), function(bld) {
+        target.integrate();
+        /*_.each(self.buildings_by_tier(), function(bld) {
             if(target && bld.tier() >= target.tier()) {
                 return;
             }
@@ -248,7 +249,7 @@ Second = Ice.$extend('Second', {
                 return;
             }
             bld.integrate();
-        });
+        });*/
         self.refresh_integrate_display();
         game.throttled_save();
     },
@@ -284,18 +285,24 @@ Second = Ice.$extend('Second', {
         _.each(self.kinds(), function(kind) {
             _.each(self.tiers(), function(tier) {
                 var bld = self.indexed_buildings()[kind + '.' + tier];
-                if(!bld) return;
-                if(!bld.prev) {
-                    bld.integrates_to(0);
-                    return;
+                var integrates_to = bld.integrates_to();
+                if(!integrates_to) {
+                    bld.cached_integration_display(null);
+                } else {
+                    bld.cached_integration_display(bld.integrates_to() - bld.qty());
                 }
+                // if(!bld) return;
+                // if(!bld.prev) {
+                //     bld.integrates_to(0);
+                //     return;
+                // }
 
-                var willbuild = bld.prev.integration_count(bld.prev.qty() + bld.prev.integrates_to());
-                if(willbuild) {
-                    //bld.prev.integrates_to(0);
-                }
+                // var willbuild = bld.prev.integration_count(bld.prev.qty() + bld.prev.integrates_to());
+                // if(willbuild) {
+                //     //bld.prev.integrates_to(0);
+                // }
 
-                bld.integrates_to(willbuild);
+                // bld.integrates_to(willbuild);
 
 
             });
