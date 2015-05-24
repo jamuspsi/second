@@ -253,6 +253,9 @@ Building = Ice.$extend('Building', {
         var possible = self.total_possible();
         if(!possible) return null;
 
+        if(!self.next) {
+            return possible;
+        }
         return Math.min(possible, self.ifactor());
     },
     // How many of these are possible to make from components.
