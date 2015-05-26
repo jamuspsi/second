@@ -158,7 +158,7 @@ Building = Ice.$extend('Building', {
     },
     get_multiplier: function(mode, currency) {
         var self = this;
-        if(self.kind == 'QA') {
+        if(self.kind == 'NOTQA') {
             return self.upgrade_bonus();
         } else {
             var qa = game.indexed_buildings()['QA.' + self.tier()];
