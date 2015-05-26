@@ -285,6 +285,9 @@ Building = Ice.$extend('Building', {
         if(self.qty() >= self.ifactor()) return false;
 
         var prev = self.prev;
+        if(!self.prev) {
+            return false;
+        }
         if(prev.total_possible() >= prev.ifactor()) {
             return true;
         }
