@@ -168,6 +168,27 @@ Second = Ice.$extend('Second', {
             }
         });
     },
+    integrate_highest: function() {
+        var self = this;
+        _.each(self.kinds(), function(kind) {
+            var buildings = _.filter(self.buildings(), function(bld) {
+                return bld.kind() === kind && bld.can_integrate();
+            });
+            if(!buildings.length) {
+                return; // Next kind.
+            }
+            buildings = _.sortBy(buildings, function(bld) {
+                return -1 * bld.tier();
+            });
+            var bld = buildings[0];
+            bld.integrate();
+
+
+            var highest = _.find(self.tiers().slice().reverse(), function(tier) {
+
+            });
+        });
+    },
     button_click: function(num) {
         var self = this;
         if(!num) {
