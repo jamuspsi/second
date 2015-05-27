@@ -353,7 +353,7 @@ add_perk({
         if(!level) {
             return 0;
         }
-        return Math.pow(2, level-1);
+        return Math.pow(level, 2);
     }
 });
 add_perk({
