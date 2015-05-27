@@ -312,7 +312,7 @@ add_perk({
     max_level: 20,
     bonus_attr: 'db1_tpc_factor',
     format: 'percent',
-    bonus: per_level(0.5)
+    bonus: per_level(0.05)
 });
 
 
