@@ -196,7 +196,7 @@ Building = Ice.$extend('Building', {
 
             }
         }
-        if(self.id() === 'Programmer.1') {
+        if(self.id() === 'Programmer.1' && game.bonuses().prog1_idle_factor) {
             game.is_idle(true);
         } else {
             game.is_idle(false);
