@@ -31,8 +31,8 @@ body {
 
     color: #f0f0f0;
     #game {
-        .building {
-        
+        .building, .perk {
+
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -40,7 +40,7 @@ body {
             -ms-user-select: none;
             user-select: none;
 
-          
+
             background-color: #272822;
             color: #f0f0f0;
             a.upgrade_link, a.integrate_link {
@@ -64,7 +64,7 @@ body {
 
     color: #101010;
     #game {
-        .building {
+        .building, .perk {
             background-color: #666;
             color: #f0f0f0;
             &.has {
@@ -126,7 +126,7 @@ body {
     font-size: 12px;
 }
 
-.building {
+.building, .perk {
     border: 1px solid white;
     .border-radius(6px);
     padding: 0px;
@@ -149,10 +149,21 @@ body {
         font-size: 8pt;
 
     }
+    .grants {
+        font-size: 10pt;
+    }
     .qty {
         font-size: 10pt;
     }
 
+}
+
+.perk {
+    max-width: 250px;
+}
+
+.perk.upgrade_ready .title_row {
+    color: green;
 }
 
 
@@ -160,7 +171,16 @@ a.upgrade_link, a.integrate_link {
     text-decoration: none;
 }
 
-
+table.statistics {
+    border: 2px solid black;
+    td {
+        text-align: center;
+    }
+    th, td {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+}
 
 .money_button {
     padding: 10px;
@@ -203,4 +223,24 @@ span.suffix {
     display: inline-block;
     margin-left: 3px;
     font-size: 10px;
+}
+.nav {
+width: 1000px;
+    text-align: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.nav_option {
+    width: 100px;
+    margin-left: 20px;
+    padding: 5px;
+    font-size: 18pt;
+    border: 1px solid black;
+    &.selected {
+        font-weight: bold;
+    }
+}
+.shortcut {
+    margin-left: 20px;
+    padding: 5px;
 }

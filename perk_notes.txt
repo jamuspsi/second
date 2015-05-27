@@ -1,0 +1,70 @@
+IT
+2x money
++1 free $ upgrade
++1 prestige/tier/column
+Top tier x% click cascade
+-x% convertion ratio
+
+QA
+-0.5 log scale
++x row bonus
+**x row bonus
+Top tier **x bonus
+Clicking 1st tier **x everything until clicking something else.
+
+Programmer
+-0.5 log scale
++x ticks/second
+**x ticks/second
+Top tier bonus ticks/second
+Clicking 1st tier gives x tick to all.
+
+DB
+-0.5 log scale
++x ticks/click
+**x ticks/click
+Top tier bonus ticks/click
+Clicking 1st tier applies x% ticks/click to a random different cell.
+
+User
+2x bugs
++1 free bug upgrade
+Prestige gain **x bonus
+Top tier +1 to self/tick
+Unlocking saves 20% previous tier
+
+
+function base_bonuses() {
+    return {
+        !money: 1,
+        !free_money_upgrades: 0,
+        !prestige_per_tier: 0,
+        !peak_click_cascade: 0,
+        !conversion_ratio: 1,
+
+        !qa_log_base: 5,
+        !qa_add_row_bonus: 0,
+        !qa_row_bonus_factor: 1,
+        !peak_production_factor: 1,
+        !qa_random_tpc_factor: 0,
+
+        !programmer_log_base: 10,
+        !programmer_tps_add: 0,
+        !programmer_tps_factor: 1,
+        !peak_bonus_tps: 0,
+        !prog1_idle_factor: 1,
+
+        !db_log_base: 5,
+        !db_tpc_add: 0,
+        !db_tpc_factor: 1,
+        !peak_bonus_tpc: 0,
+        !db1_tpt: 0,
+
+        !bugs: 1,
+        !free_bugs_upgrades: 0,
+        !prestige_factor: 1,
+        peak_self_creation: 0,
+        !unlock_conservation: 0,
+
+    };
+}

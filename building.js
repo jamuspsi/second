@@ -12,9 +12,9 @@ Building = Ice.$extend('Building', {
         self.cost = ko.observable(opts.cost || Math.pow(100, self.tier()));
         self.proof_cost = ko.observable(opts.proof_cost || 0);
 
+        self.upgrades = ko.observable(0);
         self.upgrade_currency = ko.observable(opts.upgrade_currency || 'money');
         self.upgrade_cost = ko.observable(opts.upgrade_cost || Math.pow(1000000, self.tier()-1));
-        self.upgrade_bonus = ko.observable(1);
 
         self.cached_integration_display = ko.observable(null);
         //self.integrates_to = ko.observable(0);
@@ -31,14 +31,23 @@ Building = Ice.$extend('Building', {
             'qty', 'purchased',
             'cost', 'proof_cost',
             'cost_factor', 'proof_cost_factor',
-            'per_tick', 'per_click'
+            'per_tick', 'per_click',
+            'upgrades',
         ]);
     },
     key: Ice.kocomputed(function() {
         var self = this;
         return self.kind() + '.' + self.tier();
     }),
+    id: Ice.kocomputed(function() {
+        var self = this;
+        return self.kind() + '.' + self.tier();
+    }),
 
+    upgrade_bonus: function() {
+        var self = this;
+        return 1 + game.upgrade_effectiveness() * self.upgrades();
+    },
     buy: function(amt) {
         var self = this;
 
@@ -113,19 +122,11 @@ Building = Ice.$extend('Building', {
         }
         cash_obs(cash_obs() - self.upgrade_cost());
         self.upgrade_cost(self.upgrade_cost() * upgrade_cost_factor);
-        self.upgrade_bonus(self.upgrade_bonus() + game.upgrade_effectiveness());
+        self.upgrades(self.upgrades() + 1);
 
         game.throttled_save();
     },
     manual_tick: function() {
-        var self = this;
-        game.total_clicks(game.total_clicks() + 1);
-
-        var db = game.indexed_buildings()['DB.1'].db_click_power();
-
-        game.manual_ticks(game.manual_ticks() + db);
-        game.total_ticks(game.total_ticks() + db);
-        self.tick(db);
         //self.click(db);
 
     },
@@ -134,6 +135,7 @@ Building = Ice.$extend('Building', {
         var self = this;
         _.each(self.per_tick(), function(amt, currency) {
             var mult = self.get_multiplier('tick', currency);
+
             if(currency === 'money' || currency === 'bugs') {
                 game[currency](game[currency]() + mult * amt * ticks * self.qty());
             } else {
@@ -142,28 +144,78 @@ Building = Ice.$extend('Building', {
             }
         });
 
+        if(self.id() === 'DB.1') {
+            var sub_ticks = Math.floor(ticks * game.bonuses().db1_tpt);
+            if(sub_ticks > 0) {
+                var spread = _.filter(game.buildings(), function(bld) {
+                    return bld.id() !== 'QA.1' && bld.id() !== 'DB.1' && bld.id() !== 'Programmer.1' && bld.qty();
+                });
+                _.each(spread, function(bld) {
+                    bld.tick(sub_ticks);
+                    game.bonus_ticks(game.bonus_ticks() + sub_ticks);
+                    game.total_ticks(game.total_ticks() + sub_ticks);
+                });
+
+            }
+        }
+
+
     },
     click: function(num) {
         var self = this;
-        _.each(self.per_click(), function(amt, currency) {
-            var mult = self.get_multiplier('tick', currency) * num;
-            if(currency === 'money' || currency === 'bugs') {
-                game[currency](game[currency]() + mult * amt * self.qty());
-            } else {
-                var bld = game.indexed_buildings()[currency];
-                bld.qty(bld.qty() + mult * amt * self.qty());
-            }
-        });
+        game.total_clicks(game.total_clicks() + 1);
 
+        var db_power = game.indexed_buildings()['DB.1'].db_click_power();
+        var ticks = db_power;
+        game.manual_ticks(game.manual_ticks() + ticks);
+        game.total_ticks(game.total_ticks() + ticks);
+        self.tick(ticks);
+
+        if(self.is_peak()) {
+            ticks *= (1+ game.bonuses().peak_bonus_tpc);
+
+            var sub_ticks = Math.floor(ticks * game.bonuses()['peak_click_cascade']);
+            game.bonus_ticks(game.bonus_ticks() + sub_ticks);
+            game.total_ticks(game.total_ticks() + sub_ticks);
+            self.prev.tick(sub_ticks);
+
+        }
+
+        if(self.id() === 'QA.1') {
+            var choices = _.filter(game.buildings(), function(bld) {
+                return bld.id() !== 'QA.1' && bld.id() !== 'DB.1' && bld.id() !== 'Programmer.1' && bld.qty();
+            });
+            var r = Rand.choose(choices);
+            var sub_ticks = Math.floor(ticks * game.bonuses().qa_random_tpc_factor);
+            game.bonus_ticks(game.bonus_ticks() + sub_ticks);
+            game.total_ticks(game.total_ticks() + sub_ticks);
+            // console.log("Giving ", r.id(), sub_ticks);
+            r.tick(sub_ticks);
+
+        }
+
+    },
+    is_peak: function() {
+        var self = this;
+        return (!self.next || self.next.qty() === 0) && self.qty();
     },
     get_multiplier: function(mode, currency) {
         var self = this;
-        if(self.kind == 'NOTQA') {
-            return self.upgrade_bonus();
-        } else {
-            var qa = game.indexed_buildings()['QA.' + self.tier()];
-            return self.upgrade_bonus() * qa.qa_bonus();
+
+        var mult = self.upgrade_bonus();
+        var qa = game.indexed_buildings()['QA.' + self.tier()];
+        mult *= qa.qa_bonus();
+        if(self.is_peak()) {
+            mult *= game.bonuses()['peak_production_factor'];
         }
+        if(game.is_idle()) {
+            mult *= game.bonuses()['prog1_idle_factor'];
+        }
+        if(currency === 'money' || currency === 'bugs') {
+            mult *= game.bonuses()[currency];
+        }
+        return mult;
+
     },
     qa_bonus: function() {
         var self = this;
@@ -171,39 +223,46 @@ Building = Ice.$extend('Building', {
         if(self.qty() === 0) {
             return 1;
         }
-        return 1 + Math.log(self.qty() * self.upgrade_bonus()) / Math.log(5);
+        var log_base = game.bonuses().qa_log_base;
+        var bonus = 1 + Math.log(self.qty() * self.upgrade_bonus()) / Math.log(log_base);
+        bonus += game.bonuses().qa_add_row_bonus;
+        bonus *= game.bonuses().qa_row_bonus_factor;
+        return bonus;
     },
     db_click_power: function() {
         var self = this;
         if(!self.qty()) { return 1; }
-        var base = self.qty() * self.get_multiplier();
-        return Math.max(1, Math.floor(Math.log(base) / Math.log(5)));
-    },
-    programmer_autoclicks_per_tick: function() {
-        var self = this;
-        if(!self.qty()) { return 0; }
-        return Math.floor(Math.log(self.qty() * self.get_multiplier()) / Math.log(5));
+        var qty = self.qty() * self.get_multiplier();
+        var log_base = game.bonuses().db_log_base;
+        var tpc = Math.max(1, Math.floor(Math.log(qty) / Math.log(log_base)));
+        tpc += game.bonuses().db_tpc_add;
+        tpc *= game.bonuses().db_tpc_factor;
+        return tpc;
     },
     programmer_ticks_per_second: function() {
         var self = this;
         if(!self.qty()) { return 1; }
-        var base = self.qty() * self.get_multiplier();
-        return Math.max(1, Math.floor(Math.log(base) / Math.log(10)));
+        var qty = self.qty() * self.get_multiplier();
+        var log_base = game.bonuses().programmer_log_base;
+        var tps = Math.max(1, Math.floor(Math.log(qty) / Math.log(log_base)));
+        tps += game.bonuses().programmer_tps_add;
+        tps *= game.bonuses().programmer_tps_factor;
+        return tps;
     },
     // How many of this building converts to the next.
-    ifactor: Ice.kocomputed(function() {
+    ifactor: function() {
         var self = this;
 
         var tier = self.tier();
 
-        return Math.pow(1000, self.tier());
+        return Math.pow(1000, self.tier()) * game.bonuses().conversion_ratio;
 
         if(self.kind() == 'IT') {
             return Math.pow(100, self.tier()+1);
         }
         return Math.pow(100, self.tier());
 
-    }),
+    },
     /*integration_count: function(qty) {
         var self = this;
         var ifactor = self.ifactor();
@@ -228,7 +287,15 @@ Building = Ice.$extend('Building', {
         }
         if(!self.unlocked()) {
             self.unlocked(true);
+            if(self.upgrade_currency() === 'money') {
+                self.upgrades(self.upgrades() + game.bonuses()['free_money_upgrades']);
+            }
+            if(self.upgrade_currency() === 'bugs') {
+                self.upgrades(self.upgrades() + game.bonuses()['free_bugs_upgrades']);
+            }
             icea.report_unlocked_tier(self.kind(), self.tier());
+
+            self.prev.qty(self.prev.ifactor() * game.bonuses()['unlock_conservation']);
         }
         return;
         // var ifactor = self.ifactor();

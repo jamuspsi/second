@@ -41,22 +41,45 @@
 </div>
 
 <div>
-    <button data-bind="click: game.buy_all_upgrades">Buy All Upgrades</button>
-    (No guarantees you get what you want, though.)
-</div>
-<div>
-    <button data-bind="click: game.integrate_highest">Integrate all</button>
-    (Integrates everything.  Not always a good idea!)
-</div>
-
-<div>
-    (Help, stats, and more buttons at the bottom!)
-</div>
-<div>
     Click any cell to manually tick it.
 </div>
+<div class="nav">
+    <a class="nav_option" data-bind="
+        css: game.open_pane() === 'production' ? 'selected' : '',
+        click: function() {
+            game.open_pane('production');
+        }
+    ">Production</a>
+    <a class="nav_option" data-bind="
+        css: game.open_pane() === 'prestige' ? 'selected' : '',
+        click: function() {
+            game.open_pane('prestige');
+        }
+    ">Prestige</a>
+    <a class="nav_option" data-bind="
+        css: game.open_pane() === 'help' ? 'selected' : '',
+        click: function() {
+            game.open_pane('help');
+        }
+    ">Help</a>
+    <a class="nav_option" data-bind="
+        css: game.open_pane() === 'stats' ? 'selected' : '',
+        click: function() {
+            game.open_pane('stats');
+        }
+    ">Stats</a>
 
-<div class="building_list noselect">
+    <button class="shortcut" data-bind="click: game.buy_all_upgrades">Buy All Upgrades</button>
+
+    <button class="shortcut" data-bind="click: game.integrate_highest">Integrate all</button>
+    <button class="shortcut" data-bind="
+            click: function(data, eargs) {
+                eargs.preventDefault();
+                game.save_game();
+            },
+        ">Save Game</button>
+</div>
+<div class="building_list noselect" data-bind="visible: game.open_pane() === 'production'">
     <table>
         <thead>
             <tr>
@@ -67,6 +90,7 @@
             <th class="kind_label" data-bind="text: kind"></th>
             <th></th>
             <!-- /ko -->
+            <th>Prestige</th>
             </tr>
         </thead>
         <tbody>
@@ -83,7 +107,7 @@
                 <!-- ko if: bld -->
                 <td class="building" data-bind="
                     css: bld.css(),
-                    click:_.bind(bld.manual_tick, bld)
+                    click:_.bind(bld.click, bld)
                 ">
                     <!-- ko template: {
                         name: LazyTemplate('kot/', 'building.html'),
@@ -100,7 +124,7 @@
                 <!-- /ko -->
                 <td class="horiz_spacer">&nbsp;</td>
             <!-- /ko -->
-
+            <td data-bind="text: game.prestige_for_tier(tier).toFixed(2)"></td>
         </tr>
         <tr>
             <!-- ko foreach: {
@@ -119,13 +143,120 @@
                 <td></td>
                 <!-- /ko -->
             <!-- /ko -->
+            <td></td>
+        </tr>
+        <!-- /ko -->
+    </tbody>
+    </table>
+    <div>
+        <label><input type="checkbox" data-bind="checked: game.hide_conversions" /> Hide Conversions</label>
+    </div>
+
+</div>
+
+<div class="building_list noselect" data-bind="visible: game.open_pane() === 'prestige'">
+    <table class="statistics">
+        <thead>
+            <th>Total Prestige</th>
+            <th>Unspent Prestige</th>
+            <th>Next Perk Cost</th>
+            <th>Upgrade Effectiveness</th>
+        </thead>
+        <tbody>
+            <td data-bind="text: game.prestige().toFixed(2)"></td>
+            <td data-bind="text: game.unspent_prestige().toFixed(2)"></td>
+            <td data-bind="text: game.next_perk_cost().toFixed(2)"></td>
+            <td data-bind="text: game.upgrade_effectiveness().toFixed(2)"></td>
+
+        </tbody>
+    </table>
+    <div>
+        <!-- ko if: game.can_prestige() -->
+
+        <button data-bind="
+            click: function(data, eargs) {
+                eargs.preventDefault();
+                game.new_game_plus();
+            },
+        ">Prestige</button>
+        <span>
+            Prestiging now will add <span data-bind="text: game.prestige_preview().toFixed(2)"></span>x to your upgrade effectiveness.
+        </span>
+        <!-- /ko -->
+        <!-- ko if: !game.can_prestige() -->
+        <span>
+            You can't prestige until you've at least reached 4th tier in any line.
+        </span>
+        <!-- /ko -->
+    </div>
+    <table>
+        <thead>
+            <tr>
+            <!-- ko foreach: {
+                data: game.kinds(),
+                as: 'kind'
+            } -->
+            <th class="kind_label" data-bind="text: kind"></th>
+            <th></th>
+            <!-- /ko -->
+            </tr>
+        </thead>
+        <tbody>
+        <!-- ko foreach: {
+                data: [1,2,3,4,5],
+                 as: 'tier'
+             } -->
+        <tr>
+
+            <!-- ko foreach: {
+                    data: _.map(game.kinds(), function(kind) {
+                        return game.perk_objects()[[kind, tier].join('.')];
+                    }),
+                    as: 'perk'
+                }-->
+                <!-- ko if: perk -->
+                    <td class="perk" data-bind="
+                        css: perk.css(),
+                        click: function() {
+                            game.purchase_perk(perk);
+                        }
+                    ">
+                        <!-- ko template: {
+                            name: LazyTemplate('kot/', 'perk.html'),
+                            data: perk,
+                            as: 'perk'
+                        }-->
+                        <!-- /ko -->
+                    </td>
+                <!-- /ko -->
+                <!-- ko if: !perk -->
+                    <td></td>
+                <!-- /ko -->
+                <td class="horiz_spacer">&nbsp;</td>
+
+            <!-- /ko -->
+
+        <!-- /ko -->
+        </tr>
+        <tr>
+            <!-- ko foreach: {
+                    data: game.kinds(), as: 'kind'
+                    }
+                -->
+
+                <td class="vert_spacer">
+
+                </td>
+                <td></td>
+            <!-- /ko -->
         </tr>
         <!-- /ko -->
     </tbody>
     </table>
 </div>
 
-<div class="help">
+
+<div class="help" data-bind="visible: game.open_pane() === 'help'">
     <p>
         This is a loving <strike>tribute</strike> <strike>derivative</strike> second derivative of the definitive incremental <a href="http://gzgreg.github.io/DerivativeClicker/"  target="_blank">Derivative Clicker</a>.  It's also my first published game.
     </p>
@@ -153,13 +284,14 @@
 
 </div>
 
-<div class="stats">
+<div class="stats" data-bind="visible: game.open_pane() === 'stats'">
     <table>
         <tr>
             <th>Total Ticks:</th>
             <th>Time Ticks:</th>
             <th>Total Clicks:</th>
             <th>Manual Ticks</th>
+            <th>Bonus Ticks</th>
             <th>Upgrade Efficiency:</th>
 
         <tr>
@@ -168,6 +300,7 @@
             <td data-bind="text: game.time_ticks()"></td>
             <td data-bind="text: game.total_clicks()"></td>
             <td data-bind="text: game.manual_ticks()"></td>
+            <td data-bind="text: game.bonus_ticks()"></td>
             <td>
                 <span data-bind="text: game.upgrade_effectiveness().toFixed(2)"></span>x
             </td>
@@ -178,35 +311,7 @@
 
 
 <div class="more_buttons">
-    <div>
-        <button data-bind="
-            click: function(data, eargs) {
-                eargs.preventDefault();
-                game.save_game();
-            },
-        ">Save Game</button>
-        <button data-bind="
-            click: function(data, eargs) {
-                eargs.preventDefault();
-                game.new_game_plus();
-            },
-        ">Prestige</button>
-    </div>
-    <div>
-        <label><input type="checkbox" data-bind="checked: game.hide_conversions" /> Hide Conversions</label>
-    </div>
-    <div>
-        <!-- ko if: game.can_prestige() -->
-        <span>
-            Prestiging now will add <span data-bind="text: game.prestige_preview().toFixed(2)"></span>x to your upgrade effectiveness.
-        </span>
-        <!-- /ko -->
-        <!-- ko if: !game.can_prestige() -->
-        <span>
-            You can't prestige until you've at least reached 4th tier in any line.
-        </span>
-        <!-- /ko -->
-    </div>
+
     <div>
         <button class="wipe_save" data-bind="
             click: function(data, eargs) {

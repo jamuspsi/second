@@ -59,6 +59,19 @@ NUMBER_SUFFIXES = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "Nn",
                    "Qq", "UQq", "DQq", "TQq", "QaQq", "QtQq", "SxQq", "SpQq", "OcQq", "NnQq",
                    "Sg"
 ];
+PERK_BASE_COST = 0.3;
+
+function test_perks() {
+    var perks = {};
+    _.each(PERKS, function(v,i) {
+        perks[i] = 10;
+    });
+    game.perks(perks);
+    game.prestige(20);
+    PERK_BASE_COST = 0.0000000001;
+    game.apply_perks();
+}
+
 function format_number(num) {
     if(num === 0) {
         return 0;
@@ -137,8 +150,19 @@ Second = Ice.$extend('Second', {
         self.total_ticks = ko.observable(0);
         self.manual_ticks = ko.observable(0);
         self.time_ticks = ko.observable(0);
+        self.bonus_ticks = ko.observable(0);
+
+        self.is_idle = ko.observable(false);
 
         self.hide_conversions = ko.observable(false);
+
+        self.bonuses = ko.observable(base_bonuses());
+        self.prestige = ko.observable(0);
+        self.perks = ko.observable({});
+
+        self.next_perk_cost = ko.observable(PERK_BASE_COST);
+        self.unspent_prestige = ko.observable(0);
+        self.perk_objects = ko.observable({});
 
         self.load_game(blob);
         self.tick_interval = window.setInterval(_.bind(self.tick, self), 500);
@@ -146,7 +170,7 @@ Second = Ice.$extend('Second', {
         self.autosave_interval = window.setInterval(_.bind(self.save_game, self), 60000);
         self.autoclickinterval = window.setInterval(_.bind(self.autoclick, self), 1000);
 
-
+        self.open_pane = ko.observable('production');
     },
     indexed_buildings: Ice.kocomputed(function() {
         var self = this;
@@ -205,12 +229,21 @@ Second = Ice.$extend('Second', {
     tick: function() {
         var self = this;
         var ticks = self.indexed_buildings()['Programmer.1'].programmer_ticks_per_second();
-        self.total_ticks(self.total_ticks() + ticks);
-        self.time_ticks(self.time_ticks() + ticks);
-        // console.log("Ticking ", ticks);
         // self.total_ticks(self.total_ticks() + 1);
         _.each(self.buildings_by_tier(), function(bld) {
-            bld.tick(ticks);
+            var bld_ticks = ticks;
+            if(bld.is_peak()) {
+                bld_ticks = Math.floor(bld_ticks * (1 + self.bonuses().peak_bonus_tps));
+            }
+            bld.tick(bld_ticks);
+
+            self.total_ticks(self.total_ticks() + bld_ticks);
+            console.log("Adding time_ticks", bld_ticks);
+            self.time_ticks(self.time_ticks() + bld_ticks);
+            // console.log("Ticking ", ticks);
+            if(bld.is_peak()) {
+                bld.qty(bld.qty() + self.bonuses().peak_self_creation);
+            }
         });
 
 
@@ -232,7 +265,7 @@ Second = Ice.$extend('Second', {
     money_per_click: function() {
         var self = this;
         var it = self.indexed_buildings()['IT.1'];
-        return format_number(it.qty() * it.get_multiplier('click', 'money') );
+        return format_number(it.qty() * it.get_multiplier('click', 'money') * self.bonuses()['money']);
     },
     ticks_per_second: function() {
         var self = this;
@@ -246,7 +279,7 @@ Second = Ice.$extend('Second', {
         var self = this;
 
         var it = self.indexed_buildings()['IT.1'];
-        return it.qty() * 0.01 * it.get_multiplier('click', 'money');
+        return it.qty() * 0.01 * it.get_multiplier('click', 'money') * self.bonuses()['money'];
     },
     bugs_per_second: function( ){
         var self = this;
@@ -336,23 +369,32 @@ Second = Ice.$extend('Second', {
             return bld.tier() >= 4 ? bld.qty() : 0;
         });
     }),
+    prestige_for_tier: function(tier) {
+        if(tier < 4) return 0;
+        var this_tier = Math.pow(tier-2, 2) * 0.05;
+        var prev_tier = 0;
+        if(tier > 4)
+            prev_tier = Math.pow(tier-3, 2) * 0.05;
+
+        return this_tier - prev_tier + game.bonuses()['prestige_per_tier'];
+    },
     prestige_preview: Ice.kocomputed(function() {
         var self = this;
 
         if(!self.can_prestige()) {
             return 0;
         }
+
+        var total_prestige = 0;
         var tiers_reached = {};
         _.each(self.buildings(), function(bld) {
             if(!bld.qty() || bld.tier() < 4) return;
-            if(!tiers_reached[bld.kind()] || tiers_reached[bld.kind()] < bld.tier()) {
-                tiers_reached[bld.kind()] = bld.tier();
-            }
+            total_prestige += self.prestige_for_tier(bld.tier());
         });
 
-        return _.sum(tiers_reached, function(tier) {
-            return Math.pow(tier-2, 2) * 0.05;
-        });
+        total_prestige *= game.bonuses()['prestige_factor'];
+        total_prestige = Math.floor(total_prestige * 100) / 100;
+        return total_prestige;
     }),
 
 
@@ -361,6 +403,7 @@ Second = Ice.$extend('Second', {
         _.debounce(_.bind(self.save_game, self), 1000)();
     },
     save_game: function() {
+        return;
         var self = this;
 
         var blob = {
@@ -373,6 +416,7 @@ Second = Ice.$extend('Second', {
             total_clicks: self.total_clicks(),
             time_ticks: self.time_ticks(),
             manual_ticks: self.manual_ticks(),
+            bonus_ticks: self.bonus_ticks(),
             hide_conversions: self.hide_conversions(),
 
             buildings: {}
@@ -382,7 +426,7 @@ Second = Ice.$extend('Second', {
                 qty: bld.qty(),
                 unlocked: bld.unlocked(),
                 upgrade_cost: bld.upgrade_cost(),
-                upgrade_bonus: bld.upgrade_bonus()
+                upgrades: bld.upgrades()
             };
         });
 
@@ -399,9 +443,11 @@ Second = Ice.$extend('Second', {
         self.buildings(new_buildings);
         self.refresh_building_links();
 
-        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions', 'manual_ticks', 'time_ticks'], function(attr) {
+        var new_game_blob = Second.new_game_blob();
+
+        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions', 'manual_ticks', 'time_ticks', 'bonus_ticks'], function(attr) {
             if(blob[attr] === undefined) {
-                blob[attr] = Second.new_game_blob[attr];
+                blob[attr] = new_game_blob[attr];
             }
             console.log("Loading ", attr);
             self[attr](blob[attr]);
@@ -410,7 +456,7 @@ Second = Ice.$extend('Second', {
         _.each(blob.buildings || {}, function(bld_blob, key) {
             var bld = self.indexed_buildings()[key];
             if(!bld) return;
-            _.each(['qty', 'upgrade_cost', 'upgrade_bonus', 'unlocked'], function(attr) {
+            _.each(['qty', 'upgrade_cost', 'upgrades', 'unlocked'], function(attr) {
                 if(bld_blob[attr] !== undefined) {
                     bld[attr](bld_blob[attr]);
                 }
@@ -424,6 +470,9 @@ Second = Ice.$extend('Second', {
             self.indexed_buildings()['DB.1'].unlocked(true); //oops
         }
 
+        self.perks(blob.perks);
+        self.prestige(blob.prestige);
+        self.apply_perks();
     },
     new_game_plus: function() {
         var self = this;
@@ -437,15 +486,24 @@ Second = Ice.$extend('Second', {
 
         icea.report_prestige(self.prestige_preview());
 
-        var blob = JSON.parse(JSON.stringify(Second.new_game_blob));
+        var blob = JSON.parse(JSON.stringify(Second.new_game_blob()));
         blob.total_clicks = self.total_clicks();
         blob.total_ticks = self.total_ticks();
         blob.time_ticks = self.time_ticks();
         blob.manual_ticks = self.manual_ticks();
+        blob.bonus_ticks = self.bonus_ticks(),
 
-        blob.upgrade_effectiveness = self.upgrade_effectiveness() + self.prestige_preview();
+        blob.prestige = self.prestige();
+        blob.perks = self.perks();
 
         this.load_game(blob);
+        _.each(this.buildings(), function(bld) {
+            if(bld.upgrade_currency() === 'money') {
+                bld.upgrades(self.bonuses()['free_money_upgrades']);
+            } else if(bld.upgrade_currency() === 'bugs') {
+                bld.upgrades(self.bonuses()['free_bugs_upgrades']);
+            }
+        });
 
     },
     wipe_save: function() {
@@ -456,63 +514,128 @@ Second = Ice.$extend('Second', {
         if(!window.confirm("I can't help it.  Are you REALLY SURE you want to LOSE ALL PROGRESS and START OVER?  Press OK to start from scratch, Cancel to keep going.")) {
             return;
         }
-        self.load_game(Second.new_game_blob);
-    }
+        self.load_game(Second.new_game_blob());
+    },
+    apply_perks: function() {
+        var self = this;
+        var bonuses = base_bonuses();
+        var perks_applied = 0;
+        var actual_perks = {};
 
+        _.each(self.perks(), function(level, perk_id) {
+            var perk = PERKS[perk_id];
+            if(!perk) return;
+            if(perk.max_level() !== null && level > perk.max_level()) {
+                level = perk.max_level();
+            }
+            perks_applied += level;
+            actual_perks[perk_id] = level;
+
+            perk.apply(bonuses, level);
+        });
+        var total_cost = 0.5 * PERK_BASE_COST * perks_applied * (perks_applied - 1);
+        if(total_cost > self.prestige()) {
+            window.alert('Your perks outcost your prestige, probably because the game changed.  Reapply them.');
+            self.reset_perks();
+            return;
+        }
+        self.unspent_prestige(self.prestige() - total_cost);
+        self.bonuses(bonuses);
+        self.next_perk_cost((perks_applied + 1)* PERK_BASE_COST);
+        self.perks(actual_perks);
+        self.upgrade_effectiveness(1 + self.unspent_prestige());
+
+        var perk_objs = {};
+        _.each(self.kinds(), function(kind) {
+            _.each([1,2,3,4,5], function(tier) {
+                var id = [kind, tier].join('.');
+                var perk = PERKS[id].clone();
+                perk.level(actual_perks[id] || 0);
+
+                perk_objs[id] = perk;
+            });
+        });
+        self.perk_objects(perk_objs);
+    },
+    reset_perks: function() {
+        var self = this;
+        self.perks({});
+        self.apply_perks();
+    },
+    purchase_perk: function(perk) {
+        var self = this;
+        var perk_id = perk.id();
+
+        if(self.next_perk_cost() > self.unspent_prestige()) {
+            return;
+        }
+        self.perks()[perk_id] = (self.perks()[perk_id] || 0) + 1;
+        self.apply_perks(); // Takes care of syncing cost, etc.
+    },
+    can_buy_perk: function() {
+        var self = this;
+        return self.next_perk_cost() <= self.unspent_prestige();
+    }
 });
 
 
-Second.save_version = 2;
+Second.save_version = 3;
 
-Second.new_game_blob = {
-    save_version: Second.save_version,
-    money: 0,
-    bugs: 0,
-    upgrade_effectiveness: 1,
-    total_ticks: 0,
-    total_clicks: 0,
-    time_ticks: 0,
-    manual_ticks: 0,
+Second.new_game_blob = function() {
+    return {
+        save_version: Second.save_version,
+        money: 0,
+        bugs: 0,
+        upgrade_effectiveness: 1,
+        total_ticks: 0,
+        total_clicks: 0,
+        time_ticks: 0,
+        manual_ticks: 0,
+        bonus_ticks: 0,
 
-    hide_conversions: false,
-    buildings: {
-        'IT.1': {
-            unlocked: true
-        },
-        'QA.1': {
-            unlocked: true
-        },
-        'Programmer.1': {
-            unlocked: true
-        },
-        'DB.1': {
-            unlocked: true
-        },
-        'User.1': {
-            unlocked: true
-        },
+        prestige: 0,
+        perks: {},
 
-        'IT.2': {
-            qty: 1,
-            unlocked: true
-        },
-        'QA.2': {
-            qty:1,
-            unlocked: true
-        },
-        'Programmer.2': {
-            qty: 1,
-            unlocked: true
-        },
-        'DB.2': {
-            qty: 1,
-            unlocked: true
-        },
-        'User.2': {
-            qty: 1,
-            unlocked: true
+        hide_conversions: false,
+        buildings: {
+            'IT.1': {
+                unlocked: true
+            },
+            'QA.1': {
+                unlocked: true
+            },
+            'Programmer.1': {
+                unlocked: true
+            },
+            'DB.1': {
+                unlocked: true
+            },
+            'User.1': {
+                unlocked: true
+            },
+
+            'IT.2': {
+                qty: 1,
+                unlocked: true
+            },
+            'QA.2': {
+                qty:1,
+                unlocked: true
+            },
+            'Programmer.2': {
+                qty: 1,
+                unlocked: true
+            },
+            'DB.2': {
+                qty: 1,
+                unlocked: true
+            },
+            'User.2': {
+                qty: 1,
+                unlocked: true
+            }
         }
-    }
+    };
 };
 
 Second.start_game = function() {
@@ -521,14 +644,21 @@ Second.start_game = function() {
     if(json) {
         blob = JSON.parse(json);
     } else {
-        blob = Second.new_game_blob;
+        blob = Second.new_game_blob();
     }
     if(!blob.save_version || blob.save_version < Second.save_version) {
         // blob = Second.new_game_blob;
 
         if(window.confirm("The game has changed dramatically since you last played!  Your save will still work, but it might be more fun to wipe your save and start over with the new rules.  Click OK to wipe your save now, or Cancel to continue with your old save.")) {
-            blob = Second.new_game_blob;
+            blob = Second.new_game_blob();
         }
+    }
+
+    if(blob.save_version < 3) {
+        blob.prestige = blob.upgrade_effectiveness - 1;
+        _.each(blob.buildings, function(bld) {
+            bld.upgrades = Math.floor((bld.upgrade_bonus - 1), blob.upgrade_effectiveness);
+        });
     }
     return new Second(blob);
 

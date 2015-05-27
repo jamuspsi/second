@@ -1,0 +1,162 @@
+
+
+    <div class="title_row">
+        <span class="title" data-bind="
+            text: perk.name(),
+        "></span>
+    </div>
+    <div class="perk_quantity">
+        (<span data-bind="text: perk.level()"></span>/<span data-bind="html: perk.max_level() ? perk.max_level(): '&infin;'"></span>)
+    </div>
+    <div class="grants">
+        <strong>Current:</strong>
+        <span data-bind="html: perk.current_bonus_html()"></span>
+    </div>
+    <div class="preview">
+        <strong>Next:</strong>
+        <span data-bind="html: perk.next_bonus_html()"></span>
+    </div>
+    <div class="explanation">
+        <!-- ko if: perk.id() === 'IT.1' -->
+            <span>
+                Multiplies all money earned.
+            </span>
+        <!-- /ko -->
+
+        <!-- ko if: perk.id() === 'QA.1' -->
+            <span>
+                Lowers the logarithmic base of QA row bonuses.  Currently <span data-bind="text:game.bonuses().qa_log_base.toFixed(2)"></span>
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'Programmer.1' -->
+            <span>
+                Lowers the logarithmic base of Programmer ticks/sec.  Currently <span data-bind="text:game.bonuses().programmer_log_base.toFixed(2)"></span>
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'DB.1' -->
+            <span>
+                Lowers the logarithmic base of DB ticks/click.  Currently <span data-bind="text:game.bonuses().db_log_base.toFixed(2)"></span>
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'User.1' -->
+            <span>
+                Multiplies all bugs earned.
+            </span>
+        <!-- /ko -->
+
+
+        <!-- ko if: perk.id() === 'IT.2' -->
+            <span>
+                IT, DB, and User start with free upgrades that don't count against the cost.
+            </span>
+        <!-- /ko -->
+
+        <!-- ko if: perk.id() === 'QA.2' -->
+            <span>
+                Increases all QA row bonuses by a flat amount.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'Programmer.2' -->
+            <span>
+                Increases ticks/second by a flat amount.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'DB.2' -->
+            <span>
+                Increases clicks/tick by a flat amount.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'User.2' -->
+            <span>
+                QA and Programmer start with free upgrades that don't count against the cost.
+            </span>
+        <!-- /ko -->
+
+
+        <!-- ko if: perk.id() === 'IT.3' -->
+            <span>
+                Increases prestige gained from each tier reached by a flat amount.
+            </span>
+        <!-- /ko -->
+
+        <!-- ko if: perk.id() === 'QA.3' -->
+            <span>
+                Increases all QA row bonuses by a percentage.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'Programmer.3' -->
+            <span>
+                Increases ticks/second by a percentage.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'DB.3' -->
+            <span>
+                Increases ticks/click by a percentage.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'User.3' -->
+            <span>
+                Increases all prestige gained by a percentage.
+            </span>
+        <!-- /ko -->
+
+
+
+        <!-- ko if: perk.id() === 'IT.4' -->
+            <span>
+                Clicking the best cell in any column also applied a percentage of the ticks to the next-best cell in that column.
+            </span>
+        <!-- /ko -->
+
+        <!-- ko if: perk.id() === 'QA.4' -->
+            <span>
+                All your best cells have increased production.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'Programmer.4' -->
+            <span>
+                Your best cells get bonus ticks/second.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'DB.4' -->
+            <span>
+                Your best cells get bonus ticks/click.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'User.4' -->
+            <span>
+                Your best cells create more of themselves every second.
+            </span>
+        <!-- /ko -->
+
+
+
+        <!-- ko if: perk.id() === 'IT.5' -->
+            <span>
+                Reduces the conversion ratio for all integrations.
+            </span>
+        <!-- /ko -->
+
+        <!-- ko if: perk.id() === 'QA.5' -->
+            <span>
+                Clicking <strong>Red Pens</strong> applies a percentage of your ticks/click to a randomly selected cell.  (Except <strong>Will Wright</strong> and <strong>Trapper Keeper</strong>)
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'Programmer.5' -->
+            <span>
+                Clicking <strong>Will Wright</strong> turns on idle mode until you click a different cell.  While idle, all ticks are increased by a percentage.
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'DB.5' -->
+            <span>
+                Clicking <strong>Trapper Keepr</strong> applies a small percentage of your ticks/click to all other cells.  (Except <strong>Will Wright</strong> and <strong>Trapper Keeper</strong>)
+            </span>
+        <!-- /ko -->
+        <!-- ko if: perk.id() === 'User.5' -->
+            <span>
+                When unlocking a new cell, instantly creates an amount of the previous cell equal to a percentage of its conversion factor.
+            </span>
+        <!-- /ko -->
+
+    </div>
+
