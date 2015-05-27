@@ -59,7 +59,7 @@ NUMBER_SUFFIXES = ["K", "M", "B", "T", "Qa", "Qt", "Sx", "Sp", "Oc", "Nn",
                    "Qq", "UQq", "DQq", "TQq", "QaQq", "QtQq", "SxQq", "SpQq", "OcQq", "NnQq",
                    "Sg"
 ];
-PERK_BASE_COST = 0.3;
+PERK_BASE_COST = 0.20;
 
 function test_perks() {
     var perks = {};
@@ -238,7 +238,7 @@ Second = Ice.$extend('Second', {
             bld.tick(bld_ticks);
 
             self.total_ticks(self.total_ticks() + bld_ticks);
-            console.log("Adding time_ticks", bld_ticks);
+            // console.log("Adding time_ticks", bld_ticks);
             self.time_ticks(self.time_ticks() + bld_ticks);
             // console.log("Ticking ", ticks);
             if(bld.is_peak()) {
@@ -370,15 +370,17 @@ Second = Ice.$extend('Second', {
         });
     }),
     prestige_for_tier: function(tier) {
+        var self = this;
+
         if(tier < 4) return 0;
         var this_tier = Math.pow(tier-2, 2) * 0.05;
         var prev_tier = 0;
         if(tier > 4)
             prev_tier = Math.pow(tier-3, 2) * 0.05;
 
-        return this_tier - prev_tier + game.bonuses()['prestige_per_tier'];
+        return this_tier - prev_tier + self.bonuses()['prestige_per_tier'];
     },
-    prestige_preview: Ice.kocomputed(function() {
+    prestige_preview: function() {
         var self = this;
 
         if(!self.can_prestige()) {
@@ -388,14 +390,14 @@ Second = Ice.$extend('Second', {
         var total_prestige = 0;
         var tiers_reached = {};
         _.each(self.buildings(), function(bld) {
-            if(!bld.qty() || bld.tier() < 4) return;
+            if(!bld.unlocked() || bld.tier() < 4) return;
             total_prestige += self.prestige_for_tier(bld.tier());
         });
 
-        total_prestige *= game.bonuses()['prestige_factor'];
+        total_prestige *= self.bonuses()['prestige_factor'];
         total_prestige = Math.floor(total_prestige * 100) / 100;
         return total_prestige;
-    }),
+    },
 
 
     throttled_save: function() {
@@ -403,7 +405,7 @@ Second = Ice.$extend('Second', {
         _.debounce(_.bind(self.save_game, self), 1000)();
     },
     save_game: function() {
-        return;
+        // return;
         var self = this;
 
         var blob = {
@@ -411,13 +413,14 @@ Second = Ice.$extend('Second', {
             building_qtys: {},
             money: self.money(),
             bugs: self.bugs(),
-            upgrade_effectiveness: self.upgrade_effectiveness(),
             total_ticks: self.total_ticks(),
             total_clicks: self.total_clicks(),
             time_ticks: self.time_ticks(),
             manual_ticks: self.manual_ticks(),
             bonus_ticks: self.bonus_ticks(),
             hide_conversions: self.hide_conversions(),
+            prestige: self.prestige(),
+            perks: self.perks(),
 
             buildings: {}
         };
@@ -445,7 +448,7 @@ Second = Ice.$extend('Second', {
 
         var new_game_blob = Second.new_game_blob();
 
-        _.each(['money', 'bugs', 'upgrade_effectiveness', 'total_clicks', 'total_ticks', 'hide_conversions', 'manual_ticks', 'time_ticks', 'bonus_ticks'], function(attr) {
+        _.each(['money', 'bugs', 'prestige',  'total_clicks', 'total_ticks', 'hide_conversions', 'manual_ticks', 'time_ticks', 'bonus_ticks'], function(attr) {
             if(blob[attr] === undefined) {
                 blob[attr] = new_game_blob[attr];
             }
@@ -474,17 +477,18 @@ Second = Ice.$extend('Second', {
         self.prestige(blob.prestige);
         self.apply_perks();
     },
-    new_game_plus: function() {
+    new_game_plus: function(skip_confirm) {
         var self = this;
-        if(!self.can_prestige()) {
-            window.alert("You can't prestige until you've unlocked something in the 4th tier.");
-            return;
-        }
-        if(!window.confirm("Prestiging now will cause you to lose ALL your current items and upgrades, but will permanently add " + self.prestige_preview().toFixed(2) +"x to every upgrade you buy.\n\nPress OK to prestige and gain the bonus, Cancel to keep playing for now.")) {
+        // if(!self.can_prestige()) {
+        //     window.alert("You can't prestige until you've unlocked something in the 4th tier.");
+        //     return;
+        // }
+        if(!skip_confirm && !window.confirm("Prestiging now will cause you to lose ALL your current items and upgrades, but will permanently add " + self.prestige_preview().toFixed(2) +"x to every upgrade you buy.\n\nPress OK to prestige and gain the bonus, Cancel to keep playing for now.")) {
             return;
         }
 
         icea.report_prestige(self.prestige_preview());
+        self.prestige(self.prestige() + self.prestige_preview());
 
         var blob = JSON.parse(JSON.stringify(Second.new_game_blob()));
         blob.total_clicks = self.total_clicks();
@@ -561,6 +565,16 @@ Second = Ice.$extend('Second', {
         var self = this;
         self.perks({});
         self.apply_perks();
+    },
+    click_reset_perks: function() {
+        var self = this;
+        if(!window.confirm('Resetting your perks will immediately force a prestige now.  Are you sure?')) {
+            return;
+        }
+        // So that they get their prestige bonus.  Sneaky.
+        self.new_game_plus(true);
+        self.reset_perks();
+        self.new_game_plus(true);
     },
     purchase_perk: function(perk) {
         var self = this;

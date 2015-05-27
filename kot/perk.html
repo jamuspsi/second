@@ -6,7 +6,7 @@
         "></span>
     </div>
     <div class="perk_quantity">
-        (<span data-bind="text: perk.level()"></span>/<span data-bind="html: perk.max_level() ? perk.max_level(): '&infin;'"></span>)
+        (<span data-bind="text: perk.level()"></span><!-- ko if: perk.max_level() -->/<span data-bind="html: perk.max_level() ? perk.max_level(): '&infin;'"></span><!-- /ko -->)
     </div>
     <div class="grants">
         <strong>Current:</strong>

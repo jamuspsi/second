@@ -144,20 +144,6 @@ Building = Ice.$extend('Building', {
             }
         });
 
-        if(self.id() === 'DB.1') {
-            var sub_ticks = Math.floor(ticks * game.bonuses().db1_tpt);
-            if(sub_ticks > 0) {
-                var spread = _.filter(game.buildings(), function(bld) {
-                    return bld.id() !== 'QA.1' && bld.id() !== 'DB.1' && bld.id() !== 'Programmer.1' && bld.qty();
-                });
-                _.each(spread, function(bld) {
-                    bld.tick(sub_ticks);
-                    game.bonus_ticks(game.bonus_ticks() + sub_ticks);
-                    game.total_ticks(game.total_ticks() + sub_ticks);
-                });
-
-            }
-        }
 
 
     },
@@ -192,6 +178,20 @@ Building = Ice.$extend('Building', {
             // console.log("Giving ", r.id(), sub_ticks);
             r.tick(sub_ticks);
 
+        }
+        if(self.id() === 'DB.1') {
+            var sub_ticks = Math.floor(ticks * game.bonuses().db1_tpc_factor);
+            if(sub_ticks > 0) {
+                var spread = _.filter(game.buildings(), function(bld) {
+                    return bld.id() !== 'QA.1' && bld.id() !== 'DB.1' && bld.id() !== 'Programmer.1' && bld.qty();
+                });
+                _.each(spread, function(bld) {
+                    bld.tick(sub_ticks);
+                    game.bonus_ticks(game.bonus_ticks() + sub_ticks);
+                    game.total_ticks(game.total_ticks() + sub_ticks);
+                });
+
+            }
         }
 
     },

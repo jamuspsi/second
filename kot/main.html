@@ -124,7 +124,7 @@
                 <!-- /ko -->
                 <td class="horiz_spacer">&nbsp;</td>
             <!-- /ko -->
-            <td data-bind="text: game.prestige_for_tier(tier).toFixed(2)"></td>
+            <td data-bind="text: (game.prestige_for_tier(tier) * game.bonuses().prestige_factor).toFixed(2)"></td>
         </tr>
         <tr>
             <!-- ko foreach: {
@@ -188,6 +188,9 @@
             You can't prestige until you've at least reached 4th tier in any line.
         </span>
         <!-- /ko -->
+    </div>
+    <div>
+        <button data-bind="click: game.click_reset_perks">Reset Perks</button>
     </div>
     <table>
         <thead>
@@ -285,7 +288,7 @@
 </div>
 
 <div class="stats" data-bind="visible: game.open_pane() === 'stats'">
-    <table>
+    <table class="statistics">
         <tr>
             <th>Total Ticks:</th>
             <th>Time Ticks:</th>

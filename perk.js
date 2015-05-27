@@ -119,7 +119,7 @@ function base_bonuses() {
         db_tpc_add: 0,
         db_tpc_factor: 1,
         peak_bonus_tpc: 0,
-        db1_tpt: 0,
+        db1_tpc_factor: 0,
 
         bugs: 1,
         free_bugs_upgrades: 0,
@@ -309,10 +309,10 @@ add_perk({
     kind: 'DB',
     tier: 5,
     name: 'Ticks/Tick',
-    max_level: null,
-    bonus_attr: 'db1_tpt',
+    max_level: 20,
+    bonus_attr: 'db1_tpc_factor',
     format: 'percent',
-    bonus: per_level(0.1)
+    bonus: per_level(0.5)
 });
 
 
