@@ -105,6 +105,9 @@ Building = Ice.$extend('Building', {
         if(self.can_integrate()) {
             classes += ' integration_ready';
         }
+        if(self.id() === 'Programmer.1' && game.is_idle()) {
+            classes += ' idle_mode';
+        }
         return classes;
     },
     can_upgrade: Ice.kocomputed(function() {
@@ -192,6 +195,11 @@ Building = Ice.$extend('Building', {
                 });
 
             }
+        }
+        if(self.id() === 'Programmer.1') {
+            game.is_idle(true);
+        } else {
+            game.is_idle(false);
         }
 
     },
